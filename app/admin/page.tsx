@@ -32,16 +32,16 @@ export default function AdminPortal() {
   const { setTheme } = useTheme();
   const [users, setUsers] = useState<MockUser[]>([
     {
-      id: 'FWP-2026-M8915',
-      name: 'Mirna Workout Plan User',
-      email: 'mirna@freeworkoutplanner.com',
+      id: 'MITRIXO-2026-M8915',
+      name: 'Mirna AbdelShahid',
+      email: 'mirna@mitrixoworkouts.com',
       role: 'client',
-      theme: 'pink',
+      theme: 'babyblue',
       status: 'Active',
       lastActive: 'Just Now',
     },
     {
-      id: 'FWP-2026-T4821',
+      id: 'MITRIXO-2026-T4821',
       name: 'Coach Satram',
       email: 'satram@freeworkoutplanner.com',
       role: 'coach',
@@ -50,11 +50,11 @@ export default function AdminPortal() {
       lastActive: '2 Hours Ago',
     },
     {
-      id: 'FWP-2026-A1002',
-      name: 'System Admin',
-      email: 'admin@freeworkoutplanner.com',
+      id: 'MITRIXO-2026-A1002',
+      name: 'Michael Mitry',
+      email: 'michaelmitry13@gmail.com',
       role: 'admin',
-      theme: 'coral',
+      theme: 'babyblue',
       status: 'Active',
       lastActive: 'Just Now',
     },
@@ -204,18 +204,27 @@ export default function AdminPortal() {
                             <span className={`w-3 h-3 rounded-full ${
                               u.theme === 'coral' ? 'bg-coral-500' :
                               u.theme === 'pink' ? 'bg-pink-500' :
-                              u.theme === 'emerald' ? 'bg-emerald-500' : 'bg-sky-500'
+                              u.theme === 'emerald' ? 'bg-emerald-500' :
+                              u.theme === 'babyblue' ? 'bg-sky-400' : 'bg-sky-500'
                             }`} />
-                            <span className="capitalize">{u.theme}</span>
+                            <span className="capitalize">{u.theme === 'babyblue' ? 'Baby Blue' : u.theme}</span>
                           </div>
                         </td>
                         <td className="py-4 px-2 text-right">
-                          <div className="flex items-center justify-end gap-1.5">
+                          <div className="flex items-center justify-end gap-1.5 flex-wrap">
+                            <Button 
+                              onClick={() => overrideUserTheme(u.id, 'babyblue')}
+                              variant="ghost" 
+                              size="sm" 
+                              className={`h-7 px-2 rounded-lg border text-[10px] ${u.theme === 'babyblue' ? 'border-sky-450 bg-sky-500/10 text-sky-400' : 'border-white/5 hover:bg-white/5 text-slate-400'}`}
+                            >
+                              Baby Blue
+                            </Button>
                             <Button 
                               onClick={() => overrideUserTheme(u.id, 'pink')}
                               variant="ghost" 
                               size="sm" 
-                              className={`h-7 px-2.5 rounded-lg border text-[10px] ${u.theme === 'pink' ? 'border-pink-500/40 bg-pink-500/10 text-pink-400' : 'border-white/5 hover:bg-white/5 text-slate-400'}`}
+                              className={`h-7 px-2 rounded-lg border text-[10px] ${u.theme === 'pink' ? 'border-pink-500/40 bg-pink-500/10 text-pink-400' : 'border-white/5 hover:bg-white/5 text-slate-400'}`}
                             >
                               Pink
                             </Button>
@@ -223,7 +232,7 @@ export default function AdminPortal() {
                               onClick={() => overrideUserTheme(u.id, 'emerald')}
                               variant="ghost" 
                               size="sm" 
-                              className={`h-7 px-2.5 rounded-lg border text-[10px] ${u.theme === 'emerald' ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-400' : 'border-white/5 hover:bg-white/5 text-slate-400'}`}
+                              className={`h-7 px-2 rounded-lg border text-[10px] ${u.theme === 'emerald' ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-400' : 'border-white/5 hover:bg-white/5 text-slate-400'}`}
                             >
                               Emerald
                             </Button>
@@ -231,7 +240,7 @@ export default function AdminPortal() {
                               onClick={() => overrideUserTheme(u.id, 'coral')}
                               variant="ghost" 
                               size="sm" 
-                              className={`h-7 px-2.5 rounded-lg border text-[10px] ${u.theme === 'coral' ? 'border-primary/40 bg-primary/10 text-primary' : 'border-white/5 hover:bg-white/5 text-slate-400'}`}
+                              className={`h-7 px-2 rounded-lg border text-[10px] ${u.theme === 'coral' ? 'border-primary/40 bg-primary/10 text-primary' : 'border-white/5 hover:bg-white/5 text-slate-400'}`}
                             >
                               Coral
                             </Button>
