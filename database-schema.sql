@@ -13,6 +13,8 @@ CREATE TABLE IF NOT EXISTS users (
     email VARCHAR(255) UNIQUE NOT NULL,
     name VARCHAR(100),
     avatar_url VARCHAR(512),
+    role VARCHAR(20) DEFAULT 'client' CHECK (role IN ('admin', 'client', 'coach')),
+    theme_color VARCHAR(30) DEFAULT 'coral', -- e.g., 'pink', 'coral', 'violet', 'emerald', 'sky'
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
