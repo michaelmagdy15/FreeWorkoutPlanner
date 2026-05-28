@@ -27,19 +27,19 @@ export default function RootLayout({
     : clerkKey;
 
   return (
-    <ClerkProvider publishableKey={publishableKey}>
-      <html lang="en">
-        <head>
-          <link rel="apple-touch-icon" href="/assets/images/logo_icon.png" />
-          <meta name="theme-color" content="#f97316" />
-        </head>
-        <body className="antialiased selection:bg-primary/30">
+    <html lang="en">
+      <head>
+        <link rel="apple-touch-icon" href="/assets/images/logo_icon.png" />
+        <meta name="theme-color" content="#f97316" />
+      </head>
+      <body className="antialiased selection:bg-primary/30">
+        <ClerkProvider publishableKey={publishableKey}>
           <ThemeProvider>
             {children}
           </ThemeProvider>
-        </body>
-      </html>
-    </ClerkProvider>
+        </ClerkProvider>
+      </body>
+    </html>
   );
 }
 

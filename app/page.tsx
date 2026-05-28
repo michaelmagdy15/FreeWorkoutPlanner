@@ -1,6 +1,8 @@
 "use client"
 
 import { useState, useMemo } from "react"
+import { Activity, Utensils, Award, MessageSquare } from "lucide-react"
+import { cn } from "@/lib/utils"
 import { Sidebar } from "@/components/sidebar"
 import { ChatWindow } from "@/components/chat-window"
 import { WorkoutTracker } from "@/components/workout-tracker"
@@ -131,14 +133,14 @@ export default function FitnessApp() {
 
           {/* Main Content Area */}
           <main className="flex-1 flex flex-col lg:flex-row gap-6 p-6 overflow-hidden">
-            {/* Chat Interface */}
-            <div className="flex-1 min-w-0">
+            {/* Chat Interface - always visible on desktop, on mobile visible only when activeTab is "Chat" */}
+            <div className={cn("flex-1 min-w-0 md:block", activeTab === "Chat" ? "block" : "hidden")}>
               <ChatWindow />
             </div>
 
-            {/* Right Panel - Content based on active tab */}
-            <div className="w-full lg:w-96 space-y-6 overflow-y-auto pr-1">
-              {activeTab === "Workouts" && (
+            {/* Right Panel - Content based on active tab. Always visible on desktop, on mobile visible only when activeTab is not "Chat" */}
+            <div className={cn("w-full lg:w-96 space-y-6 overflow-y-auto pr-1 pb-20 md:pb-0 md:block", activeTab === "Chat" ? "hidden" : "block")}>
+              {(activeTab === "Workouts" || activeTab === "Chat") && (
                 <WorkoutTracker 
                   loggedWorkouts={memoizedLoggedWorkouts}
                   currentPlan={memoizedCurrentPlan}
@@ -206,6 +208,53 @@ export default function FitnessApp() {
               </div>
             </div>
           </main>
+        </div>
+
+        {/* Mobile Sticky Bottom Navigation Bar */}
+        <div className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-slate-950/85 backdrop-blur-lg border-t border-white/5 px-6 flex items-center justify-around z-30 shadow-[0_-10px_35px_rgba(0,0,0,0.6)]">
+          <button
+            onClick={() => setActiveTab("Chat")}
+            className={cn(
+              "flex flex-col items-center gap-1 py-1 transition-all duration-300 w-16",
+              activeTab === "Chat" ? "text-[hsl(var(--primary))] scale-105 font-bold" : "text-slate-400 hover:text-slate-200"
+            )}
+          >
+            <MessageSquare className="w-5 h-5" />
+            <span className="text-[9px] font-semibold uppercase tracking-wider">Coach</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("Workouts")}
+            className={cn(
+              "flex flex-col items-center gap-1 py-1 transition-all duration-300 w-16",
+              activeTab === "Workouts" ? "text-[hsl(var(--primary))] scale-105 font-bold" : "text-slate-400 hover:text-slate-200"
+            )}
+          >
+            <Activity className="w-5 h-5" />
+            <span className="text-[9px] font-semibold uppercase tracking-wider">Workouts</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("Nutrition")}
+            className={cn(
+              "flex flex-col items-center gap-1 py-1 transition-all duration-300 w-16",
+              activeTab === "Nutrition" ? "text-secondary scale-105 font-bold" : "text-slate-400 hover:text-slate-200"
+            )}
+          >
+            <Utensils className="w-5 h-5" />
+            <span className="text-[9px] font-semibold uppercase tracking-wider">Meals</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("Feedback")}
+            className={cn(
+              "flex flex-col items-center gap-1 py-1 transition-all duration-300 w-16",
+              activeTab === "Feedback" ? "text-emerald-400 scale-105 font-bold" : "text-slate-400 hover:text-slate-200"
+            )}
+          >
+            <Award className="w-5 h-5" />
+            <span className="text-[9px] font-semibold uppercase tracking-wider">Progress</span>
+          </button>
         </div>
 
         {/* Floating Action Button */}

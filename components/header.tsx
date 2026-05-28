@@ -2,7 +2,8 @@
 
 import { Dumbbell, Menu, Settings, ShieldAlert, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useUser, SignInButton } from "@clerk/nextjs";
+import { useUser, SignInButton, Show, UserButton } from "@clerk/nextjs";
+
 
 interface HeaderProps {
   onOpenSettings?: () => void;
@@ -35,17 +36,25 @@ export function Header({ onOpenSettings }: HeaderProps) {
               <ShieldAlert className="w-3 h-3 animate-pulse" />
               Dev Mock
             </span>
-          ) : isSignedIn ? (
-            <span className="hidden sm:flex items-center gap-1 text-[9px] px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-semibold shadow-sm">
-              <ShieldCheck className="w-3 h-3" />
-              Secured Auth
-            </span>
           ) : (
-            <SignInButton mode="modal">
-              <Button size="sm" className="h-8 rounded-xl bg-[hsl(var(--primary))]/20 hover:bg-[hsl(var(--primary))]/30 text-[hsl(var(--primary))] border border-[hsl(var(--primary))]/30 text-xs px-3 font-semibold transition-all">
-                Sign In
-              </Button>
-            </SignInButton>
+            <>
+              <Show when="signed-in">
+                <div className="flex items-center gap-2">
+                  <span className="hidden sm:flex items-center gap-1 text-[9px] px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-semibold shadow-sm">
+                    <ShieldCheck className="w-3 h-3" />
+                    Secured Auth
+                  </span>
+                  <UserButton />
+                </div>
+              </Show>
+              <Show when="signed-out">
+                <SignInButton mode="modal">
+                  <Button size="sm" className="h-8 rounded-xl bg-[hsl(var(--primary))]/20 hover:bg-[hsl(var(--primary))]/30 text-[hsl(var(--primary))] border border-[hsl(var(--primary))]/30 text-xs px-3 font-semibold transition-all">
+                    Sign In
+                  </Button>
+                </SignInButton>
+              </Show>
+            </>
           )}
 
           {/* Settings / Customize Accent Trigger */}

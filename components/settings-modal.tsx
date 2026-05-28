@@ -55,6 +55,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
     pink: 'bg-[hsl(330,100%,71%)] shadow-[hsl(330,100%,71%)]/20',
     emerald: 'bg-[hsl(142,76%,45%)] shadow-[hsl(142,76%,45%)]/20',
     sky: 'bg-[hsl(200,95%,55%)] shadow-[hsl(200,95%,55%)]/20',
+    babyblue: 'bg-[hsl(198,93%,68%)] shadow-[hsl(198,93%,68%)]/20',
   };
 
   // Get active display details based on Auth status

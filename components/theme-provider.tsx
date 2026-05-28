@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
-export type ThemeName = 'coral' | 'pink' | 'emerald' | 'sky';
+export type ThemeName = 'coral' | 'pink' | 'emerald' | 'sky' | 'babyblue';
 
 export interface ThemeValues {
   primary: string;       // HSL values without brackets
@@ -36,6 +36,12 @@ export const themes: Record<ThemeName, ThemeValues> = {
     ring: '200 95% 55%',
     name: 'Deep Blue Sky',
   },
+  babyblue: {
+    primary: '198 93% 68%',
+    secondary: '210 75% 55%',
+    ring: '198 93% 68%',
+    name: 'Baby Blue (Mirna)',
+  },
 };
 
 interface ThemeContextType {
@@ -47,15 +53,14 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<ThemeName>('coral');
+  const [theme, setThemeState] = useState<ThemeName>('babyblue');
 
   // Load theme preference and boot PWA service workers on mount
   useEffect(() => {
     const savedTheme = localStorage.getItem('fwp-theme-color') as ThemeName;
-    if (savedTheme && themes[savedTheme]) {
-      setThemeState(savedTheme);
-      applyTheme(savedTheme);
-    }
+    const active = savedTheme && themes[savedTheme] ? savedTheme : 'babyblue';
+    setThemeState(active);
+    applyTheme(active);
 
     // Register PWA Service Worker for local caching
     if ('serviceWorker' in navigator) {
