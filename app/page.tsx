@@ -12,12 +12,16 @@ import { LogModal } from "@/components/log-modal"
 import { Header } from "@/components/header"
 import { SettingsModal } from "@/components/settings-modal"
 import { useFitnessData } from "@/hooks/useFitnessData"
+import { useUser } from "@/lib/auth"
 import { OfflineSyncBanner } from "@/components/offline-sync-banner"
 
 export default function FitnessApp() {
   const [activeTab, setActiveTab] = useState("Workouts")
   const [showLogModal, setShowLogModal] = useState(false)
   const [showSettingsModal, setShowSettingsModal] = useState(false)
+  
+  const { user, isSignedIn } = useUser()
+  const userId = isSignedIn && user ? user.id : 'default-user'
   
   // Connect to MCP server
   const {
@@ -27,7 +31,7 @@ export default function FitnessApp() {
     error,
     logNewEntry,
     clearError,
-  } = useFitnessData()
+  } = useFitnessData(userId)
 
   const handleLogActivity = () => {
     setShowLogModal(true)

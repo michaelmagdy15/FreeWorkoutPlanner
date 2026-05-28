@@ -1,12 +1,9 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 
-// Define protected admin and data API routes
+// Define protected admin and debug routes
 const isProtectedRoute = createRouteMatcher([
   '/admin(.*)',
-  '/api/debug(.*)',
-  '/api/context(.*)',
-  '/api/plan(.*)',
-  '/api/log(.*)'
+  '/api/debug(.*)'
 ])
 
 export default clerkMiddleware(async (auth, req) => {
