@@ -10,10 +10,8 @@ out
 .git
 .gitignore
 
-# Environment secrets
-.env
-.env.local
-.env*.local
+# Environment secrets are included for Next.js build-time variables
+# .env.local
 
 # Client PDF deliverables & backups
 *.pdf
