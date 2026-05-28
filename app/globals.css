@@ -1,0 +1,155 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 220 25% 6%;
+    --foreground: 210 40% 98%;
+    --card: 220 20% 12%;
+    --card-foreground: 210 40% 98%;
+    --popover: 220 25% 6%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 12 100% 63%;          /* Neon Coral */
+    --primary-foreground: 210 40% 98%;
+    --secondary: 262 83% 62%;        /* Electric Violet */
+    --secondary-foreground: 210 40% 98%;
+    --muted: 220 20% 18%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 220 20% 18%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 220 20% 16%;
+    --input: 220 20% 16%;
+    --ring: 12 100% 63%;
+    --radius: 1.5rem;
+    
+    --font-heading: 'Outfit', sans-serif;
+    --font-sans: 'Plus Jakarta Sans', sans-serif;
+  }
+}
+
+@layer base {
+  * {
+    border-color: rgba(255, 255, 255, 0.08);
+  }
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-family: var(--font-sans);
+    overflow-x: hidden;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    font-weight: 700;
+  }
+}
+
+/* Glassmorphism Panel styles */
+.glass-panel {
+  background: rgba(26, 29, 36, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+}
+
+.glass-panel-hover {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.glass-panel-hover:hover {
+  border-color: rgba(251, 113, 133, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px 0 rgba(251, 113, 133, 0.05);
+}
+
+/* Custom Gradients */
+.gradient-text {
+  background: linear-gradient(135deg, hsl(12, 100%, 63%) 0%, hsl(262, 83%, 62%) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-bg {
+  background: linear-gradient(135deg, hsl(12, 100%, 63%) 0%, hsl(262, 83%, 62%) 100%);
+}
+
+.gradient-bg-dark {
+  background: linear-gradient(135deg, hsla(12, 100%, 63%, 0.1) 0%, hsla(262, 83%, 62%, 0.1) 100%);
+}
+
+/* Rest Timer Alarm Animations */
+@keyframes flashCoral {
+  0% { background-color: rgba(26, 29, 36, 0.7); }
+  50% { background-color: rgba(251, 113, 133, 0.25); border-color: hsl(12, 100%, 63%); }
+  100% { background-color: rgba(26, 29, 36, 0.7); }
+}
+
+.flash-coral {
+  animation: flashCoral 1.2s ease-in-out infinite;
+}
+
+/* Tempo Pulse Animation */
+@keyframes pulseCircle {
+  0% { transform: scale(0.9); opacity: 0.2; }
+  50% { transform: scale(1.1); opacity: 0.6; }
+  100% { transform: scale(0.9); opacity: 0.2; }
+}
+
+.tempo-pulse {
+  animation: pulseCircle 2s infinite ease-in-out;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(220, 25%, 6%);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.24);
+}
+
+/* Compact checklist row utilities */
+.compact-row {
+  white-space: nowrap;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Custom form and button overrides */
+.btn-premium {
+  background: linear-gradient(135deg, hsl(12, 100%, 63%) 0%, hsl(262, 83%, 62%) 100%);
+  color: white;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+.btn-premium:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(251, 113, 133, 0.25);
+}
+
+.btn-secondary-premium {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: white;
+  transition: all 0.2s ease;
+}
+.btn-secondary-premium:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.16);
+}
