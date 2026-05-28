@@ -8,11 +8,14 @@ import { MealTracker } from "@/components/meal-tracker"
 import { FloatingActionButton } from "@/components/floating-action-button"
 import { LogModal } from "@/components/log-modal"
 import { Header } from "@/components/header"
+import { SettingsModal } from "@/components/settings-modal"
 import { useFitnessData } from "@/hooks/useFitnessData"
+import { OfflineSyncBanner } from "@/components/offline-sync-banner"
 
 export default function FitnessApp() {
   const [activeTab, setActiveTab] = useState("Workouts")
   const [showLogModal, setShowLogModal] = useState(false)
+  const [showSettingsModal, setShowSettingsModal] = useState(false)
   
   // Connect to MCP server
   const {
@@ -96,7 +99,8 @@ export default function FitnessApp() {
       </div>
 
       <div className="relative z-10 flex flex-col min-h-screen">
-        <Header />
+        <Header onOpenSettings={() => setShowSettingsModal(true)} />
+        <OfflineSyncBanner />
         
         {/* Premium Dark Error Alert */}
         {error && (
@@ -212,6 +216,12 @@ export default function FitnessApp() {
           isOpen={showLogModal} 
           onClose={() => setShowLogModal(false)}
           onActivityLogged={handleActivityLogged}
+        />
+
+        {/* Settings Modal */}
+        <SettingsModal 
+          isOpen={showSettingsModal} 
+          onClose={() => setShowSettingsModal(false)}
         />
       </div>
     </div>
