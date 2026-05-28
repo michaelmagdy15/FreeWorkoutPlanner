@@ -29,7 +29,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <link rel="apple-touch-icon" href="/assets/images/logo_icon.png" />
+        <link rel="apple-touch-icon" href="/assets/images/logo_icon.svg" />
         <meta name="theme-color" content="#f97316" />
       </head>
       <body className="antialiased selection:bg-primary/30">

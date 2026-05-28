@@ -1,6 +1,26 @@
-import { clerkMiddleware } from '@clerk/nextjs/server'
+import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 
-export default clerkMiddleware()
+// Define protected admin and data API routes
+const isProtectedRoute = createRouteMatcher([
+  '/admin(.*)',
+  '/api/debug(.*)',
+  '/api/context(.*)',
+  '/api/plan(.*)',
+  '/api/log(.*)'
+])
+
+export default clerkMiddleware(async (auth, req) => {
+  const clerkKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+  const isMock = !clerkKey || clerkKey === 'your_clerk_publishable_key_here' || (clerkKey && clerkKey.includes('mock-clerk'));
+
+  if (isMock) {
+    return;
+  }
+
+  if (isProtectedRoute(req)) {
+    await auth.protect();
+  }
+})
 
 export const config = {
   matcher: [

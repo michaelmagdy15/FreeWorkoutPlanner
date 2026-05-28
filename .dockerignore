@@ -1,0 +1,28 @@
+# Dependency directories
+node_modules
+.pnpm-store
+
+# Next.js build output
+.next
+out
+
+# Git directory
+.git
+.gitignore
+
+# Environment secrets
+.env
+.env.local
+.env*.local
+
+# Client PDF deliverables & backups
+*.pdf
+backup/
+.tmp/
+dist/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*

@@ -2,7 +2,7 @@ const CACHE_NAME = 'fwp-app-cache-v1';
 const STATIC_ASSETS = [
   '/',
   '/manifest.json',
-  '/favicon.ico',
+  '/favicon.svg',
   '/assets/images/logo_icon.svg',
   '/assets/images/exercise_rdl.png',
   '/assets/images/exercise_split_squat.png',
