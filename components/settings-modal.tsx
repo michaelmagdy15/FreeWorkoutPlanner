@@ -4,7 +4,7 @@ import React from 'react';
 import { useTheme, ThemeName } from '@/components/theme-provider';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { useUser, SignOutButton } from '@clerk/nextjs';
+import { useUser, SignOutButton } from '@/lib/auth';
 import { Settings, User, Palette, Shield, UserCheck, LogOut, Check } from 'lucide-react';
 
 interface SettingsModalProps {
@@ -60,10 +60,10 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
 
   // Get active display details based on Auth status
   const userProfile = {
-    name: isMockMode || !isSignedIn ? 'Mirna Workout Plan User' : (user.fullName || user.username || 'Client'),
-    email: isMockMode || !isSignedIn ? 'mirna@freeworkoutplanner.com' : user.primaryEmailAddress?.emailAddress,
-    id: isMockMode || !isSignedIn ? 'FWP-2026-M8915' : `CLERK-${user.id.substring(0, 10).toUpperCase()}`,
-    avatar: isMockMode || !isSignedIn ? null : user.imageUrl,
+    name: isMockMode || !isSignedIn || !user ? 'Mirna Workout Plan User' : (user.fullName || user.username || 'Client'),
+    email: isMockMode || !isSignedIn || !user ? 'mirna@freeworkoutplanner.com' : user.primaryEmailAddress?.emailAddress,
+    id: isMockMode || !isSignedIn || !user ? 'FWP-2026-M8915' : `CLERK-${user.id.substring(0, 10).toUpperCase()}`,
+    avatar: isMockMode || !isSignedIn || !user ? null : user.imageUrl,
     role: isMockMode ? 'Mock Client' : 'Client',
   };
 

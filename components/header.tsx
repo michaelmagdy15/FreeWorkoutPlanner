@@ -2,7 +2,7 @@
 
 import { Dumbbell, Menu, Settings, ShieldAlert, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useUser, SignInButton, Show, UserButton } from "@clerk/nextjs";
+import { useUser, SignInButton, Show, UserButton } from "@/lib/auth";
 
 
 interface HeaderProps {

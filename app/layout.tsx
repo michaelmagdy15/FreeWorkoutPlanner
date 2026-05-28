@@ -1,6 +1,6 @@
 import './globals.css';
 import { ThemeProvider } from '@/components/theme-provider';
-import { ClerkProvider } from '@clerk/nextjs';
+import { ClerkProvider } from '@/lib/auth';
 
 export const metadata = {
   title: "MITRIXO Workouts",
