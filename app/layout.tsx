@@ -3,13 +3,13 @@ import { ThemeProvider } from '@/components/theme-provider';
 import { ClerkProvider } from '@clerk/nextjs';
 
 export const metadata = {
-  title: "Free Workout Planner",
+  title: "MITRIXO Workouts",
   description: "Personalized health and fitness coaching with MCP tools",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "Free Workout Planner",
+    title: "MITRIXO Workouts",
   },
 };
 
@@ -23,7 +23,7 @@ export default function RootLayout({
   
   // Use a valid format dummy test key to prevent ClerkProvider from throwing an error in development mock mode
   const publishableKey = isMock 
-    ? 'pk_test_bW9jay1jbGVyay1rZXktOTk5LmNsZXJrLmFjY291bnRzLmRldiQ' 
+    ? 'pk_test_bW9jay1jbGVyay1rZXktOTk5LmNsZXJrLmFjY291bnRzLmRldiQ=' 
     : clerkKey;
 
   return (

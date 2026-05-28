@@ -1,6 +1,6 @@
 {
-  "name": "Free Workout Planner",
-  "short_name": "FreeWorkout",
+  "name": "MITRIXO Workouts",
+  "short_name": "MITRIXO",
   "description": "Personalized health and fitness coaching with dynamic color customizers and offline gym tracking.",
   "start_url": "/",
   "display": "standalone",

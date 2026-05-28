@@ -23,7 +23,7 @@ export function Header({ onOpenSettings }: HeaderProps) {
           </div>
           <div>
             <h1 className="text-lg font-extrabold tracking-tight gradient-text">
-              FreeWorkoutPlanner
+              MITRIXO Workouts
             </h1>
             <p className="text-[10px] text-slate-400 font-medium">Plateau-Breaker Training Portal</p>
           </div>
