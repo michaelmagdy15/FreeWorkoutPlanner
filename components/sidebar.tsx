@@ -1,6 +1,6 @@
 "use client"
 
-import { Activity, Utensils, MessageSquare, TrendingUp, Heart } from "lucide-react"
+import { Activity, Utensils, MessageSquare, TrendingUp, Heart, BookOpen, Apple } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
@@ -20,8 +20,10 @@ interface SidebarProps {
 export function Sidebar({ activeTab, setActiveTab, progressData }: SidebarProps) {
   const tabs = [
     { name: "Workouts", icon: Activity, color: "text-primary" },
+    { name: "Routines", icon: BookOpen, color: "text-indigo-400" },
+    { name: "Diets", icon: Apple, color: "text-emerald-400" },
     { name: "Nutrition", icon: Utensils, color: "text-secondary" },
-    { name: "Feedback", icon: MessageSquare, color: "text-emerald-400" },
+    { name: "Feedback", icon: MessageSquare, color: "text-indigo-300" },
     { name: "Social", icon: Heart, color: "text-red-400" },
   ]
 

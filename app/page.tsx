@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useMemo } from "react"
-import { Activity, Utensils, Award, MessageSquare, Heart } from "lucide-react"
+import { Activity, Utensils, Award, MessageSquare, Heart, BookOpen, Apple } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Sidebar } from "@/components/sidebar"
 import { ChatWindow } from "@/components/chat-window"
@@ -16,6 +16,8 @@ import { useUser } from "@/lib/auth"
 import { OfflineSyncBanner } from "@/components/offline-sync-banner"
 import { ReadinessCheck } from "@/components/readiness-check"
 import { CommunityFeed } from "@/components/community-feed"
+import { RoutinesLibrary } from "@/components/routines-library"
+import { NutritionLibrary } from "@/components/nutrition-library"
 
 export default function FitnessApp() {
   const [activeTab, setActiveTab] = useState("Workouts")
@@ -156,6 +158,12 @@ export default function FitnessApp() {
                   shouldScaleVolume={scaleVolume}
                 />
               )}
+              {activeTab === "Routines" && (
+                <RoutinesLibrary />
+              )}
+              {activeTab === "Diets" && (
+                <NutritionLibrary />
+              )}
               {activeTab === "Nutrition" && (
                 <MealTracker 
                   loggedNutrition={memoizedLoggedNutrition}
@@ -224,60 +232,82 @@ export default function FitnessApp() {
         </div>
 
         {/* Mobile Sticky Bottom Navigation Bar */}
-        <div className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-slate-950/85 backdrop-blur-lg border-t border-white/5 px-6 flex items-center justify-around z-30 shadow-[0_-10px_35px_rgba(0,0,0,0.6)]">
+        <div className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-slate-950/85 backdrop-blur-lg border-t border-white/5 px-2 flex items-center justify-around z-30 shadow-[0_-10px_35px_rgba(0,0,0,0.6)]">
           <button
             onClick={() => setActiveTab("Chat")}
             className={cn(
-              "flex flex-col items-center gap-1 py-1 transition-all duration-300 w-16",
+              "flex flex-col items-center gap-1 py-1 transition-all duration-300 flex-1",
               activeTab === "Chat" ? "text-[hsl(var(--primary))] scale-105 font-bold" : "text-slate-400 hover:text-slate-200"
             )}
           >
-            <MessageSquare className="w-5 h-5" />
-            <span className="text-[9px] font-semibold uppercase tracking-wider">Coach</span>
+            <MessageSquare className="w-4 h-4" />
+            <span className="text-[8px] font-semibold uppercase tracking-wider">Coach</span>
           </button>
 
           <button
             onClick={() => setActiveTab("Workouts")}
             className={cn(
-              "flex flex-col items-center gap-1 py-1 transition-all duration-300 w-16",
+              "flex flex-col items-center gap-1 py-1 transition-all duration-300 flex-1",
               activeTab === "Workouts" ? "text-[hsl(var(--primary))] scale-105 font-bold" : "text-slate-400 hover:text-slate-200"
             )}
           >
-            <Activity className="w-5 h-5" />
-            <span className="text-[9px] font-semibold uppercase tracking-wider">Workouts</span>
+            <Activity className="w-4 h-4" />
+            <span className="text-[8px] font-semibold uppercase tracking-wider">Workouts</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("Routines")}
+            className={cn(
+              "flex flex-col items-center gap-1 py-1 transition-all duration-300 flex-1",
+              activeTab === "Routines" ? "text-indigo-400 scale-105 font-bold" : "text-slate-400 hover:text-slate-200"
+            )}
+          >
+            <BookOpen className="w-4 h-4" />
+            <span className="text-[8px] font-semibold uppercase tracking-wider">Library</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("Diets")}
+            className={cn(
+              "flex flex-col items-center gap-1 py-1 transition-all duration-300 flex-1",
+              activeTab === "Diets" ? "text-emerald-400 scale-105 font-bold" : "text-slate-400 hover:text-slate-200"
+            )}
+          >
+            <Apple className="w-4 h-4" />
+            <span className="text-[8px] font-semibold uppercase tracking-wider">Diets</span>
           </button>
 
           <button
             onClick={() => setActiveTab("Nutrition")}
             className={cn(
-              "flex flex-col items-center gap-1 py-1 transition-all duration-300 w-16",
+              "flex flex-col items-center gap-1 py-1 transition-all duration-300 flex-1",
               activeTab === "Nutrition" ? "text-secondary scale-105 font-bold" : "text-slate-400 hover:text-slate-200"
             )}
           >
-            <Utensils className="w-5 h-5" />
-            <span className="text-[9px] font-semibold uppercase tracking-wider">Meals</span>
+            <Utensils className="w-4 h-4" />
+            <span className="text-[8px] font-semibold uppercase tracking-wider">Meals</span>
           </button>
 
           <button
             onClick={() => setActiveTab("Feedback")}
             className={cn(
-              "flex flex-col items-center gap-1 py-1 transition-all duration-300 w-16",
+              "flex flex-col items-center gap-1 py-1 transition-all duration-300 flex-1",
               activeTab === "Feedback" ? "text-emerald-400 scale-105 font-bold" : "text-slate-400 hover:text-slate-200"
             )}
           >
-            <Award className="w-5 h-5" />
-            <span className="text-[9px] font-semibold uppercase tracking-wider">Progress</span>
+            <Award className="w-4 h-4" />
+            <span className="text-[8px] font-semibold uppercase tracking-wider">Progress</span>
           </button>
 
           <button
             onClick={() => setActiveTab("Social")}
             className={cn(
-              "flex flex-col items-center gap-1 py-1 transition-all duration-300 w-16",
+              "flex flex-col items-center gap-1 py-1 transition-all duration-300 flex-1",
               activeTab === "Social" ? "text-red-400 scale-105 font-bold" : "text-slate-400 hover:text-slate-200"
             )}
           >
-            <Heart className="w-5 h-5" />
-            <span className="text-[9px] font-semibold uppercase tracking-wider">Social</span>
+            <Heart className="w-4 h-4" />
+            <span className="text-[8px] font-semibold uppercase tracking-wider">Social</span>
           </button>
         </div>
 

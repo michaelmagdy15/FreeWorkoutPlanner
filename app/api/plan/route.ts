@@ -5,7 +5,7 @@ export async function POST(request: NextRequest) {
   let userId: string | undefined;
   
   try {
-    const { userId: requestUserId, planType = 'daily', userMessage = '', customPlan = null } = await request.json()
+    const { userId: requestUserId, planType = 'daily', userMessage = '', customPlan = null, customMeals = null } = await request.json()
     userId = requestUserId; // Capture userId for use in catch block
 
     if (!userId) {
@@ -15,13 +15,16 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // If we have a custom plan from the chat interface, use it directly
-    if (customPlan) {
-      console.log('📋 Using custom plan from chat interface:', customPlan)
+    // Retrieve existing plan from store if any, to allow merging
+    const existingPlan = planStore.get(userId) || { workouts: [], meals: [], recommendations: [] }
+
+    // If we have custom exercises or meals, merge and store them
+    if (customPlan || customMeals) {
+      console.log('📋 Merging custom workouts/meals into active plan store:', { workouts: !!customPlan, meals: !!customMeals })
       
       const planText = generateContextualPlanText(planType, userMessage)
       const structuredPlan = {
-        workouts: customPlan.map((exercise: any, index: number) => ({
+        workouts: customPlan ? customPlan.map((exercise: any, index: number) => ({
           id: (index + 1).toString(),
           name: exercise.name,
           type: exercise.type || 'strength',
@@ -30,8 +33,23 @@ export async function POST(request: NextRequest) {
           weight: exercise.weight || undefined,
           duration: exercise.duration ? (exercise.duration.includes('s') ? parseInt(exercise.duration) : parseInt(exercise.duration) * 60) : exercise.estimatedDuration || undefined,
           completed: false,
-        })),
-        meals: [],
+          day: exercise.day || 1,
+          note: exercise.note || undefined,
+          img: exercise.img || undefined,
+        })) : existingPlan.workouts,
+        
+        meals: customMeals ? customMeals.map((meal: any, index: number) => ({
+          id: (index + 1).toString(),
+          mealType: meal.mealType || 'snack',
+          name: meal.name,
+          calories: parseInt(meal.calories) || 300,
+          protein: parseInt(meal.protein) || 20,
+          carbs: parseInt(meal.carbs) || 30,
+          fat: parseInt(meal.fat) || 10,
+          time: meal.time || '12:00 PM',
+          completed: false,
+        })) : existingPlan.meals,
+        
         recommendations: [
           'Focus on proper form over speed',
           'Rest 30-60 seconds between sets',
@@ -42,7 +60,7 @@ export async function POST(request: NextRequest) {
 
       // Store the plan in memory for retrieval by context API
       planStore.set(userId, structuredPlan)
-      console.log('💾 Stored plan for user:', userId, structuredPlan)
+      console.log('💾 Stored merged plan for user:', userId, structuredPlan)
       
       return NextResponse.json({
         success: true,

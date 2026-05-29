@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react"
 import { Send, Bot, User, Zap, Database, FileText, MessageSquare, Dumbbell, Apple } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { useUser } from "@/lib/auth"
 import { cn } from "@/lib/utils"
 
 interface Message {
@@ -16,19 +17,36 @@ interface Message {
 }
 
 export function ChatWindow() {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "1",
-      content:
-        "Welcome to your personal training portal, Mirna! I am your AI fitness coach. I have loaded 'The Plateau-Breaker Split' into our memory stores. You can ask me to log sets, track nutrition, generate new targeted workout structures, or review your progressive overload stats. How are we crushing it today? 💪",
-      sender: "coach",
-      timestamp: new Date(Date.now() - 300000),
-      toolUsed: "context-viewer"
-    },
-  ])
+  const { user, isSignedIn } = useUser()
+  const clerkKey = typeof window !== 'undefined' ? process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY : ''
+  const isMockMode = !clerkKey || clerkKey === 'your_clerk_publishable_key_here'
+
+  const [messages, setMessages] = useState<Message[]>([])
   const [newMessage, setNewMessage] = useState("")
   const [isTyping, setIsTyping] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const hasInitialized = useRef(false)
+
+  useEffect(() => {
+    if (hasInitialized.current) return
+
+    const greetingName = isMockMode || !isSignedIn || !user 
+      ? 'Athlete' 
+      : (user.firstName || user.username || 'Athlete')
+
+    if (user || isMockMode || !isSignedIn) {
+      setMessages([
+        {
+          id: "1",
+          content: `Welcome to your personal training portal, ${greetingName}! I am your AI fitness coach. I have loaded 'The Plateau-Breaker Split' into our memory stores. You can ask me to log sets, track nutrition, generate new targeted workout structures, or review your progressive overload stats. How are we crushing it today? 💪`,
+          sender: "coach",
+          timestamp: new Date(Date.now() - 300000),
+          toolUsed: "context-viewer"
+        }
+      ])
+      hasInitialized.current = true
+    }
+  }, [user, isSignedIn, isMockMode])
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })

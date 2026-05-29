@@ -5,7 +5,7 @@ import { useTheme, ThemeName } from '@/components/theme-provider';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { useUser, SignOutButton } from '@/lib/auth';
-import { Settings, User, Palette, Shield, UserCheck, LogOut, Check } from 'lucide-react';
+import { Settings, User, Palette, Shield, UserCheck, LogOut, Check, Sparkles } from 'lucide-react';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -60,8 +60,8 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
 
   // Get active display details based on Auth status
   const userProfile = {
-    name: isMockMode || !isSignedIn || !user ? 'Mirna Workout Plan User' : (user.fullName || user.username || 'Client'),
-    email: isMockMode || !isSignedIn || !user ? 'mirna@freeworkoutplanner.com' : user.primaryEmailAddress?.emailAddress,
+    name: isMockMode || !isSignedIn || !user ? 'Premium Athlete' : (user.fullName || user.username || 'Client'),
+    email: isMockMode || !isSignedIn || !user ? 'athlete@freeworkoutplanner.com' : user.primaryEmailAddress?.emailAddress,
     id: isMockMode || !isSignedIn || !user ? 'FWP-2026-M8915' : `CLERK-${user.id.substring(0, 10).toUpperCase()}`,
     avatar: isMockMode || !isSignedIn || !user ? null : user.imageUrl,
     role: isMockMode ? 'Mock Client' : 'Client',
@@ -132,6 +132,23 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
             <div className="pt-2.5 border-t border-white/5 flex items-center justify-between text-[10px] text-slate-400">
               <span>Goal: Plateau Breaker (RPE 8-9)</span>
               <span className="line-clamp-1">{userProfile.email}</span>
+            </div>
+          </div>
+
+          {/* 100% FREE LIFETIME ACCOUNT STATUS */}
+          <div className="p-3.5 rounded-2xl bg-gradient-to-r from-[hsl(var(--primary))]/10 to-indigo-500/10 border border-[hsl(var(--primary))]/20 flex items-start gap-3 relative overflow-hidden group">
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out" />
+            <div className="w-8 h-8 rounded-xl bg-slate-900/60 border border-white/5 flex items-center justify-center flex-shrink-0 text-[hsl(var(--primary))] font-extrabold text-sm">
+              FREE
+            </div>
+            <div>
+              <p className="text-[10px] font-black text-white uppercase tracking-wider flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-[hsl(var(--primary))] animate-pulse" />
+                100% Free Lifetime Account
+              </p>
+              <p className="text-[9px] text-slate-450 leading-relaxed mt-0.5 font-medium">
+                You have active lifetime access to all premium tracking engines, interactive splits, custom diets, metronome metrics, and accelerometers at zero cost.
+              </p>
             </div>
           </div>
 
