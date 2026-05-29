@@ -18,8 +18,10 @@ import { ReadinessCheck } from "@/components/readiness-check"
 import { CommunityFeed } from "@/components/community-feed"
 import { RoutinesLibrary } from "@/components/routines-library"
 import { NutritionLibrary } from "@/components/nutrition-library"
+import { Preloader } from "@/components/preloader"
 
 export default function FitnessApp() {
+  const [isLoaded, setIsLoaded] = useState(false)
   const [activeTab, setActiveTab] = useState("Workouts")
   const [showLogModal, setShowLogModal] = useState(false)
   const [showSettingsModal, setShowSettingsModal] = useState(false)
@@ -80,16 +82,9 @@ export default function FitnessApp() {
     return context?.currentPlan?.workouts || []
   }, [context?.currentPlan?.workouts])
 
-  // Premium Dark Loading Screen
-  if (loading && !context) {
-    return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 animate-spin rounded-full border-2 border-slate-800 border-t-primary" />
-          <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Loading Training Context...</p>
-        </div>
-      </div>
-    )
+  // Render full-screen custom preloader initially
+  if (!isLoaded) {
+    return <Preloader onComplete={() => setIsLoaded(true)} />
   }
 
   return (
