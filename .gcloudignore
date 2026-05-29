@@ -1,0 +1,15 @@
+# .gcloudignore
+# This file specifies files to exclude from uploading to Google Cloud Build.
+
+# Exclude version control and heavy build directories
+.git/
+.next/
+node_modules/
+dist/
+backup/
+.tmp/
+.cursor/
+*.pdf
+
+# Include environment variables for Next.js build-time embedding
+!.env.local

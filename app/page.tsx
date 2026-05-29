@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useMemo } from "react"
-import { Activity, Utensils, Award, MessageSquare } from "lucide-react"
+import { Activity, Utensils, Award, MessageSquare, Heart } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Sidebar } from "@/components/sidebar"
 import { ChatWindow } from "@/components/chat-window"
@@ -14,11 +14,15 @@ import { SettingsModal } from "@/components/settings-modal"
 import { useFitnessData } from "@/hooks/useFitnessData"
 import { useUser } from "@/lib/auth"
 import { OfflineSyncBanner } from "@/components/offline-sync-banner"
+import { ReadinessCheck } from "@/components/readiness-check"
+import { CommunityFeed } from "@/components/community-feed"
 
 export default function FitnessApp() {
   const [activeTab, setActiveTab] = useState("Workouts")
   const [showLogModal, setShowLogModal] = useState(false)
   const [showSettingsModal, setShowSettingsModal] = useState(false)
+  const [showReadiness, setShowReadiness] = useState(true)
+  const [scaleVolume, setScaleVolume] = useState(false)
   
   const { user, isSignedIn } = useUser()
   const userId = isSignedIn && user ? user.id : 'default-user'
@@ -47,9 +51,10 @@ export default function FitnessApp() {
   // Memoize props to prevent infinite re-renders
   const memoizedLoggedWorkouts = useMemo(() => {
     return context?.recentEntries?.workouts?.map(workout => ({
+      ...workout,
       id: workout.id || Date.now().toString(),
       name: workout.name || 'Unknown Exercise',
-      type: workout.type || 'strength',
+      type: (workout.type === 'cardio' ? 'cardio' : 'strength') as 'strength' | 'cardio',
       completed: workout.completed || false,
       timestamp: workout.timestamp || new Date().toISOString(),
       duration: workout.duration || 0
@@ -148,12 +153,16 @@ export default function FitnessApp() {
                 <WorkoutTracker 
                   loggedWorkouts={memoizedLoggedWorkouts}
                   currentPlan={memoizedCurrentPlan}
+                  shouldScaleVolume={scaleVolume}
                 />
               )}
               {activeTab === "Nutrition" && (
                 <MealTracker 
                   loggedNutrition={memoizedLoggedNutrition}
                 />
+              )}
+              {activeTab === "Social" && (
+                <CommunityFeed />
               )}
               {activeTab === "Feedback" && (
                 <div className="glass-panel rounded-3xl p-6">
@@ -259,6 +268,17 @@ export default function FitnessApp() {
             <Award className="w-5 h-5" />
             <span className="text-[9px] font-semibold uppercase tracking-wider">Progress</span>
           </button>
+
+          <button
+            onClick={() => setActiveTab("Social")}
+            className={cn(
+              "flex flex-col items-center gap-1 py-1 transition-all duration-300 w-16",
+              activeTab === "Social" ? "text-red-400 scale-105 font-bold" : "text-slate-400 hover:text-slate-200"
+            )}
+          >
+            <Heart className="w-5 h-5" />
+            <span className="text-[9px] font-semibold uppercase tracking-wider">Social</span>
+          </button>
         </div>
 
         {/* Floating Action Button */}
@@ -275,6 +295,15 @@ export default function FitnessApp() {
         <SettingsModal 
           isOpen={showSettingsModal} 
           onClose={() => setShowSettingsModal(false)}
+        />
+
+        {/* Readiness Check Modal */}
+        <ReadinessCheck
+          isOpen={showReadiness}
+          onClose={() => setShowReadiness(false)}
+          onComplete={(score, shouldScale) => {
+            setScaleVolume(shouldScale)
+          }}
         />
       </div>
     </div>

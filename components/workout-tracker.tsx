@@ -1,12 +1,14 @@
 "use client"
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react"
-import { Dumbbell, Plus, Zap, Play, Pause, RotateCcw, Volume2, Award, ChevronDown, ChevronUp } from "lucide-react"
+import { Dumbbell, Plus, Zap, Play, Pause, RotateCcw, Volume2, Award, ChevronDown, ChevronUp, Scale, Heart } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { cn } from "@/lib/utils"
 import { useFitnessData } from "@/hooks/useFitnessData"
-import { PlannedWorkout } from "@/lib/api"
+import { PlannedWorkout, WorkoutEntry } from "@/lib/api"
+import { calculateOverload } from "@/lib/overload"
+import { PlateCalculator } from "@/components/plate-calculator"
 
 // Workout split days structure
 const WORKOUT_DAYS = [
@@ -43,19 +45,29 @@ const WORKOUT_DAYS = [
 ]
 
 interface WorkoutTrackerProps {
-  loggedWorkouts?: Array<{
-    id: string
-    name: string
-    type: string
-    completed: boolean
-    timestamp: string
-    duration?: number
-  }>
+  loggedWorkouts?: WorkoutEntry[]
   currentPlan?: PlannedWorkout[]
+  shouldScaleVolume?: boolean
 }
 
-export function WorkoutTracker({ loggedWorkouts = [], currentPlan = [] }: WorkoutTrackerProps) {
+export function WorkoutTracker({ loggedWorkouts = [], currentPlan = [], shouldScaleVolume = false }: WorkoutTrackerProps) {
   const { logNewEntry } = useFitnessData()
+
+  // Dynamic set calculator based on RPE readiness scaling
+  const getExerciseSets = useCallback((exercise: any) => {
+    if (shouldScaleVolume && exercise.type !== "cardio") {
+      return Math.max(1, (exercise.sets || 3) - 1);
+    }
+    return exercise.sets || 3;
+  }, [shouldScaleVolume]);
+
+  // Plate Calculator Modal weight state
+  const [calculatorWeight, setCalculatorWeight] = useState<number | null>(null);
+
+  // Accelerometer states for real-time velocity coaching
+  const [accelData, setAccelData] = useState<{ x: number; y: number; z: number }>({ x: 0, y: 0, z: 0 });
+  const [liftingTempoStatus, setLiftingTempoStatus] = useState<string>("Standby");
+  const [tempoWarning, setTempoWarning] = useState<boolean>(false);
 
   // 1. Tab Management (Day 1 / Day 2 / Day 3)
   const [activeDay, setActiveDay] = useState<number>(() => {
@@ -326,6 +338,67 @@ export function WorkoutTracker({ loggedWorkouts = [], currentPlan = [] }: Workou
       if (metronomeIntervalRef.current) clearInterval(metronomeIntervalRef.current)
     }
   }, [])
+
+  // Handle device motion for lift velocity pacing check using browser accelerometers
+  useEffect(() => {
+    if (!metronome.isPlaying) {
+      setLiftingTempoStatus("Standby")
+      setTempoWarning(false)
+      return
+    }
+    
+    let speedExceededCount = 0
+    
+    const handleMotion = (event: DeviceMotionEvent) => {
+      const accel = event.accelerationIncludingGravity
+      if (!accel) return
+      
+      const x = accel.x || 0
+      const y = accel.y || 0
+      const z = accel.z || 0
+      
+      setAccelData({ x, y, z })
+      
+      // Calculate overall acceleration magnitude
+      const magnitude = Math.sqrt(x*x + y*y + z*z)
+      
+      // Dynamic motion rules checking eccentric speed
+      if (metronome.phase.includes("LOWER")) {
+        if (magnitude > 13.5) {
+          speedExceededCount++
+          if (speedExceededCount > 3) {
+            setLiftingTempoStatus("Dropping Too Fast! ⚠️")
+            setTempoWarning(true)
+          }
+        } else {
+          setLiftingTempoStatus("Good Controlled Pace ✅")
+          setTempoWarning(false)
+        }
+      } else if (metronome.phase.includes("EXPLODE")) {
+        setLiftingTempoStatus("Concentric Power 🔥")
+        setTempoWarning(false)
+      }
+    }
+    
+    if (typeof window !== "undefined" && "DeviceMotionEvent" in window) {
+      const reqPermission = (DeviceMotionEvent as any).requestPermission
+      if (typeof reqPermission === "function") {
+        reqPermission().then((state: string) => {
+          if (state === "granted") {
+            window.addEventListener("devicemotion", handleMotion)
+          }
+        }).catch(() => {})
+      } else {
+        window.addEventListener("devicemotion", handleMotion)
+      }
+    }
+    
+    return () => {
+      if (typeof window !== "undefined") {
+        window.removeEventListener("devicemotion", handleMotion)
+      }
+    }
+  }, [metronome.isPlaying, metronome.phase])
 
   // Active workout session stopwatch
   useEffect(() => {
@@ -609,6 +682,22 @@ export function WorkoutTracker({ loggedWorkouts = [], currentPlan = [] }: Workou
             </p>
           </div>
         </div>
+
+        {/* Dynamic Velocity Accel Coach feedback banner */}
+        {metronome.isPlaying && (
+          <div className={cn(
+            "mt-3 p-2.5 rounded-xl border flex items-center justify-between text-xs transition-all duration-300",
+            tempoWarning 
+              ? "bg-amber-500/10 border-amber-500/30 text-amber-400 animate-pulse" 
+              : "bg-slate-900/40 border-white/5 text-slate-305"
+          )}>
+            <span className="font-semibold uppercase tracking-wider text-[9px] text-slate-400">Accelerometer feedback:</span>
+            <span className="font-black flex items-center gap-1.5 uppercase font-mono">
+              <span className={cn("w-2 h-2 rounded-full", tempoWarning ? "bg-amber-500" : "bg-emerald-400")} />
+              {liftingTempoStatus}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* 5. Dynamic Warm-up Checklist */}
@@ -695,7 +784,7 @@ export function WorkoutTracker({ loggedWorkouts = [], currentPlan = [] }: Workou
                         {exercise.name}
                       </h4>
                       <p className="text-[10px] text-slate-400 mt-1 font-medium">
-                        {exercise.sets} Sets × {exercise.reps} Reps | Target: <span className="text-slate-300 font-semibold">{exercise.weight || "Bodyweight"}</span>
+                        {getExerciseSets(exercise)} Sets × {exercise.reps} Reps | Target: <span className="text-slate-300 font-semibold">{exercise.weight || "Bodyweight"}</span>
                       </p>
                     </div>
                     <div className="text-slate-400 mt-1">
@@ -725,11 +814,49 @@ export function WorkoutTracker({ loggedWorkouts = [], currentPlan = [] }: Workou
                         </div>
                       )}
 
+                      {/* Progressive Overload Recommendation Banner */}
+                      {(() => {
+                        const overloadSuggestion = calculateOverload(
+                          loggedWorkouts, 
+                          exercise.name, 
+                          exercise.reps, 
+                          parseFloat(exercise.weight) || 20
+                        );
+                        if (!overloadSuggestion) return null;
+                        return (
+                          <div className="p-3 bg-primary/5 border border-primary/10 rounded-xl flex items-start gap-2.5">
+                            <Zap className="w-4 h-4 text-[hsl(var(--primary))] mt-0.5 flex-shrink-0 animate-pulse" />
+                            <div>
+                              <span className="text-[9px] font-black uppercase text-[hsl(var(--primary))] tracking-wider block">Recommended Overload Progression</span>
+                              <p className="text-xs text-slate-350 leading-relaxed mt-0.5 font-bold">
+                                Target: <span className="text-white font-black">{overloadSuggestion.suggestedWeight}kg</span> for <span className="text-white font-black">{overloadSuggestion.suggestedReps} reps</span>
+                              </p>
+                              <p className="text-[10px] text-slate-400 mt-0.5 leading-normal">{overloadSuggestion.reason}</p>
+                            </div>
+                          </div>
+                        );
+                      })()}
+
                       {/* Set Checklist Block */}
                       <div className="space-y-2">
-                        <span className="text-[9px] uppercase font-black text-slate-400 tracking-wider">Set Tracker & Progressive Overload</span>
+                        <div className="flex items-center justify-between">
+                          <span className="text-[9px] uppercase font-black text-slate-400 tracking-wider">Set Tracker & Progressive Overload</span>
+                          {exercise.type !== "cardio" && (
+                            <button
+                              onClick={() => {
+                                const wtVal = parseFloat(exercise.weight) || 20;
+                                setCalculatorWeight(wtVal);
+                              }}
+                              type="button"
+                              className="px-2 py-0.5 rounded-lg bg-slate-900/60 border border-white/5 text-[9px] hover:bg-slate-800 text-slate-400 hover:text-white flex items-center gap-1 font-bold"
+                            >
+                              <Scale className="w-3.5 h-3.5 text-slate-400" />
+                              Plate Calculator
+                            </button>
+                          )}
+                        </div>
                         <div className="space-y-2">
-                          {Array.from({ length: exercise.sets || 1 }).map((_, index) => {
+                          {Array.from({ length: getExerciseSets(exercise) }).map((_, index) => {
                             const setNum = index + 1
                             const setKey = `${exercise.id}_set_${setNum}`
                             const setData = progress[setKey] || { completed: false, weight: "", reps: exercise.reps.toString() }
@@ -800,6 +927,15 @@ export function WorkoutTracker({ loggedWorkouts = [], currentPlan = [] }: Workou
           </div>
         )}
       </div>
+
+      {/* Barbell Plate Loader Modal */}
+      {calculatorWeight !== null && (
+        <PlateCalculator
+          targetWeight={calculatorWeight}
+          isOpen={calculatorWeight !== null}
+          onClose={() => setCalculatorWeight(null)}
+        />
+      )}
     </div>
   )
 }
