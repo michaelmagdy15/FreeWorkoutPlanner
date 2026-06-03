@@ -1,7 +1,7 @@
 "use client"
 
-import React, { useState } from "react"
-import { Dumbbell, Sparkles, BookOpen, Target, CheckCircle2, ChevronRight, ChevronDown, ChevronUp, Search, Flame, ShieldAlert } from "lucide-react"
+import React, { useState, useEffect } from "react"
+import { Dumbbell, Sparkles, BookOpen, Target, CheckCircle2, ChevronRight, ChevronDown, ChevronUp, Search, Flame, ShieldAlert, CalendarDays } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { useFitnessData } from "@/hooks/useFitnessData"
@@ -661,6 +661,15 @@ const ROUTINE_LIBRARY: Routine[] = [
   }
 ]
 
+const DAYS_OF_WEEK = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const
+type DayOfWeek = typeof DAYS_OF_WEEK[number]
+
+// Helper: count unique training days in a routine
+function getRoutineDayCount(routine: Routine): number {
+  const uniqueDays = new Set(routine.exercises.map(ex => ex.day))
+  return uniqueDays.size
+}
+
 export function RoutinesLibrary() {
   const { user, isSignedIn } = useUser()
   const userId = isSignedIn && user ? user.id : "default-user"
@@ -672,7 +681,49 @@ export function RoutinesLibrary() {
   const [activatingId, setActivatingId] = useState<string | null>(null)
   const [showSyncSuccess, setShowSyncSuccess] = useState(false)
 
-  // Filter routines based on search and goal selector
+  // Training days selector state
+  const [selectedDays, setSelectedDays] = useState<DayOfWeek[]>([])
+  const [dayFilterMode, setDayFilterMode] = useState<"off" | "match">("off")
+
+  // Load saved training days from localStorage
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("mitrixo-training-days")
+      if (saved) {
+        const parsed = JSON.parse(saved)
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setSelectedDays(parsed)
+          setDayFilterMode("match")
+        }
+      }
+    } catch {}
+  }, [])
+
+  // Save training days to localStorage
+  useEffect(() => {
+    if (selectedDays.length > 0) {
+      localStorage.setItem("mitrixo-training-days", JSON.stringify(selectedDays))
+    } else {
+      localStorage.removeItem("mitrixo-training-days")
+    }
+  }, [selectedDays])
+
+  const toggleDay = (day: DayOfWeek) => {
+    setSelectedDays(prev => {
+      const next = prev.includes(day) ? prev.filter(d => d !== day) : [...prev, day]
+      setDayFilterMode(next.length > 0 ? "match" : "off")
+      return next
+    })
+  }
+
+  const clearDaySelection = () => {
+    setSelectedDays([])
+    setDayFilterMode("off")
+  }
+
+  const userDayCount = selectedDays.length
+
+  // Filter routines based on search, goal selector, AND training day availability
   const filteredRoutines = ROUTINE_LIBRARY.filter((item) => {
     const matchesSearch = 
       item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -680,7 +731,12 @@ export function RoutinesLibrary() {
       item.goal.toLowerCase().includes(searchQuery.toLowerCase())
     
     const matchesGoal = selectedGoal === "All" || item.level === selectedGoal
-    return matchesSearch && matchesGoal
+
+    // If day filter is on, only show routines that fit within available days
+    const routineDays = getRoutineDayCount(item)
+    const matchesDays = dayFilterMode === "off" || routineDays <= userDayCount
+
+    return matchesSearch && matchesGoal && matchesDays
   })
 
   // Set active routine in planStore via Next.js API
@@ -771,9 +827,9 @@ export function RoutinesLibrary() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5 sm:space-y-6">
       {/* 1. Header Banner */}
-      <div className="glass-panel rounded-3xl p-6 relative overflow-hidden">
+      <div className="glass-panel rounded-2xl sm:rounded-3xl p-4 sm:p-6 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-500/10 rounded-full blur-3xl" />
         <div className="flex items-center gap-3 mb-2">
           <span className="text-xs font-extrabold uppercase px-2 py-1 rounded-md bg-indigo-500/10 text-indigo-400 flex items-center gap-1.5">
@@ -781,26 +837,90 @@ export function RoutinesLibrary() {
             Interactive Splits Library
           </span>
         </div>
-        <h3 className="text-xl font-bold tracking-tight mb-2">Select Workout Program</h3>
+        <h3 className="text-lg sm:text-xl font-bold tracking-tight mb-2">Select Workout Program</h3>
         <p className="text-xs text-slate-400 leading-relaxed">
-          Browse and activate professionally designed workout splits. Click **Activate** to dynamically update your active daily checklist and dashboard telemetry instantly.
+          Browse and activate professionally designed workout splits. Click <strong>Activate</strong> to dynamically update your active daily checklist and dashboard telemetry instantly.
         </p>
       </div>
 
-      {/* 2. Success Alert Box */}
+      {/* 2. Training Days Selector */}
+      <div className="glass-panel rounded-2xl sm:rounded-3xl p-4 sm:p-5 space-y-3 border border-[hsl(var(--primary))]/10">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-xl bg-[hsl(var(--primary))]/10 flex items-center justify-center">
+              <CalendarDays className="w-4 h-4 text-[hsl(var(--primary))]" />
+            </div>
+            <div>
+              <h4 className="text-sm font-bold text-white">Your Training Schedule</h4>
+              <p className="text-[10px] text-slate-500">Select the days you can work out — we'll show matching programs</p>
+            </div>
+          </div>
+          {selectedDays.length > 0 && (
+            <button
+              onClick={clearDaySelection}
+              className="text-[10px] text-slate-500 hover:text-white underline underline-offset-2 transition-colors flex-shrink-0"
+            >
+              Clear
+            </button>
+          )}
+        </div>
+
+        {/* Day Toggle Buttons */}
+        <div className="grid grid-cols-7 gap-1.5 sm:gap-2">
+          {DAYS_OF_WEEK.map((day) => {
+            const isSelected = selectedDays.includes(day)
+            return (
+              <button
+                key={day}
+                onClick={() => toggleDay(day)}
+                className={cn(
+                  "py-2.5 sm:py-3 rounded-xl text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all duration-200 border",
+                  isSelected
+                    ? "bg-[hsl(var(--primary))]/15 border-[hsl(var(--primary))]/40 text-[hsl(var(--primary))] shadow-md shadow-[hsl(var(--primary))]/10"
+                    : "bg-slate-950/40 border-white/5 text-slate-500 hover:text-slate-300 hover:border-white/10"
+                )}
+              >
+                {day}
+              </button>
+            )
+          })}
+        </div>
+
+        {/* Summary Bar */}
+        {selectedDays.length > 0 && (
+          <div className="flex items-center justify-between bg-slate-950/40 rounded-xl px-3 sm:px-4 py-2.5 border border-white/5">
+            <div className="text-xs text-slate-400">
+              <span className="font-bold text-white">{selectedDays.length} day{selectedDays.length !== 1 ? 's' : ''}</span> per week selected
+              <span className="text-slate-600 mx-1.5">•</span>
+              <span className="text-[10px] hidden sm:inline">{selectedDays.join(", ")}</span>
+              <span className="text-[10px] sm:hidden">{selectedDays.join(", ")}</span>
+            </div>
+            <span className={cn(
+              "text-[9px] font-bold px-2 py-0.5 rounded-full border",
+              dayFilterMode === "match"
+                ? "bg-[hsl(var(--primary))]/10 border-[hsl(var(--primary))]/30 text-[hsl(var(--primary))]"
+                : "bg-slate-800/50 border-white/5 text-slate-500"
+            )}>
+              {dayFilterMode === "match" ? "Filtering Active" : "No Filter"}
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* 3. Success Alert Box */}
       {showSyncSuccess && (
-        <div className="bg-emerald-950/20 border border-emerald-500/30 text-emerald-400 rounded-2xl p-4 flex items-center gap-3 animate-in fade-in duration-300">
+        <div className="bg-emerald-950/20 border border-emerald-500/30 text-emerald-400 rounded-2xl p-3 sm:p-4 flex items-center gap-3 animate-in fade-in duration-300">
           <CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0 animate-bounce" />
           <div>
             <p className="text-xs font-bold uppercase tracking-wider">Routine Activated Successfully!</p>
             <p className="text-[10px] text-slate-400 leading-relaxed mt-0.5">
-              Unified stores synchronized. Switch to the **Workouts** tab to view your updated active set checklist.
+              Unified stores synchronized. Switch to the <strong>Workouts</strong> tab to view your updated active set checklist.
             </p>
           </div>
         </div>
       )}
 
-      {/* 3. Search & Filter Bar */}
+      {/* 4. Search & Filter Bar */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
           <Search className="absolute left-3.5 top-3.5 w-4 h-4 text-slate-500" />
@@ -813,13 +933,13 @@ export function RoutinesLibrary() {
           />
         </div>
 
-        <div className="flex gap-1.5 p-1 bg-slate-950/60 border border-white/5 rounded-2xl">
+        <div className="flex gap-1.5 p-1 bg-slate-950/60 border border-white/5 rounded-2xl overflow-x-auto">
           {["All", "Beginner", "Intermediate", "Advanced"].map((lvl) => (
             <button
               key={lvl}
               onClick={() => setSelectedGoal(lvl)}
               className={cn(
-                "px-3 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all",
+                "px-3 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all whitespace-nowrap",
                 selectedGoal === lvl
                   ? "bg-white/10 text-white font-bold"
                   : "text-slate-500 hover:text-slate-350"
@@ -858,18 +978,40 @@ export function RoutinesLibrary() {
                 <div className={cn("absolute inset-0 bg-gradient-to-br to-transparent opacity-0 hover:opacity-[0.03] pointer-events-none transition-all duration-300", styles.glow)} />
 
                 {/* Card Header summary */}
-                <div className="p-6 relative">
-                  <div className="flex items-center justify-between gap-3 mb-2.5">
-                    <span className={cn("text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded border", styles.badge)}>
-                      {routine.badge}
-                    </span>
+                <div className="p-4 sm:p-6 relative">
+                  <div className="flex items-center justify-between gap-2 mb-2.5 flex-wrap">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className={cn("text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded border", styles.badge)}>
+                        {routine.badge}
+                      </span>
+                      <span className="text-[9px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-[hsl(var(--primary))]/10 border border-[hsl(var(--primary))]/20 text-[hsl(var(--primary))] flex items-center gap-1">
+                        <CalendarDays className="w-2.5 h-2.5" />
+                        {getRoutineDayCount(routine)}-Day Program
+                      </span>
+                    </div>
                     <span className="text-[9px] font-mono text-slate-500 font-bold uppercase tracking-wider bg-white/5 px-2 py-0.5 rounded">
                       Level: {routine.level}
                     </span>
                   </div>
 
-                  <h4 className="text-lg font-bold text-white tracking-tight leading-snug">{routine.title}</h4>
-                  <p className="text-xs text-slate-400 mt-2 leading-relaxed">{routine.description}</p>
+                  <h4 className="text-base sm:text-lg font-bold text-white tracking-tight leading-snug">{routine.title}</h4>
+                  <p className="text-[11px] sm:text-xs text-slate-400 mt-2 leading-relaxed">{routine.description}</p>
+
+                  {/* Day match indicator */}
+                  {dayFilterMode === "match" && (
+                    <div className={cn(
+                      "mt-3 text-[10px] font-bold px-3 py-1.5 rounded-xl inline-flex items-center gap-1.5 border",
+                      getRoutineDayCount(routine) <= userDayCount
+                        ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+                        : "bg-red-500/10 border-red-500/20 text-red-400"
+                    )}>
+                      <CheckCircle2 className="w-3 h-3" />
+                      {getRoutineDayCount(routine) <= userDayCount
+                        ? `Fits your ${userDayCount}-day schedule`
+                        : `Needs ${getRoutineDayCount(routine)} days (you selected ${userDayCount})`
+                      }
+                    </div>
+                  )}
 
                   <div className="flex items-center gap-3 mt-4 border-t border-white/5 pt-4">
                     <div className="flex-1 text-[10px] text-slate-500 font-medium">
@@ -878,15 +1020,15 @@ export function RoutinesLibrary() {
 
                     <button
                       onClick={() => setExpandedRoutine(isExpanded ? null : routine.id)}
-                      className="text-xs font-bold text-slate-400 hover:text-white flex items-center gap-1 transition-colors"
+                      className="text-xs font-bold text-slate-400 hover:text-white flex items-center gap-1 transition-colors flex-shrink-0"
                     >
                       {isExpanded ? (
                         <>
-                          Hide Splits <ChevronUp className="w-3.5 h-3.5" />
+                          Hide <ChevronUp className="w-3.5 h-3.5" />
                         </>
                       ) : (
                         <>
-                          Show Exercises <ChevronDown className="w-3.5 h-3.5" />
+                          Show <ChevronDown className="w-3.5 h-3.5" />
                         </>
                       )}
                     </button>
