@@ -30,70 +30,291 @@ interface DietPlan {
 }
 
 const DIET_LIBRARY: DietPlan[] = [
+  // ──────────────────────────────────────────────────
+  // FAT LOSS & CUTTING PLANS
+  // ──────────────────────────────────────────────────
   {
-    id: "plateau-breaker-diet",
-    title: "Plateau-Breaker Recovery Diet",
-    badge: "Balanced & Hormone Optimizing",
-    description: "Tailored to support muscular recovery and joint health during high-intensity splits. Focuses on nutrient-dense recovery sources.",
+    id: "aggressive-fat-loss-1200",
+    title: "Aggressive Fat Loss 1200 kcal",
+    badge: "PSMF-Inspired · Supervised Cutting",
+    description: "A very-low-calorie, protein-sparing modified fast for rapid fat loss under professional supervision. Maximizes protein to preserve lean mass while creating a steep deficit. Not for long-term use — cycle 2-4 weeks max.",
     theme: "babyblue",
-    goal: "Hormonal Balance & Muscular Recovery",
+    goal: "Rapid Fat Loss & Lean Mass Preservation",
+    caloriesTarget: 1200,
+    proteinTarget: 140,
+    meals: [
+      { mealType: "breakfast", name: "Egg White Scramble (8 whites) with Spinach & Salsa", calories: 220, protein: 36, carbs: 6, fat: 2, time: "07:30 AM" },
+      { mealType: "lunch", name: "Grilled Chicken Breast (6 oz) on Mixed Greens with Lemon Vinaigrette", calories: 310, protein: 42, carbs: 8, fat: 12, time: "12:30 PM" },
+      { mealType: "snack", name: "Non-Fat Greek Yogurt (200g) with Cinnamon", calories: 120, protein: 20, carbs: 8, fat: 0, time: "03:30 PM" },
+      { mealType: "dinner", name: "Baked Cod Fillet (7 oz) with Steamed Broccoli & Lemon", calories: 280, protein: 42, carbs: 10, fat: 6, time: "06:30 PM" },
+      { mealType: "snack", name: "Casein Protein Shake (1 scoop) with Water", calories: 120, protein: 24, carbs: 3, fat: 1, time: "09:00 PM" }
+    ]
+  },
+  {
+    id: "moderate-cut-1500",
+    title: "Moderate Cut 1500 kcal",
+    badge: "Sustainable Deficit · Balanced Macros",
+    description: "A sustainable calorie deficit that keeps energy levels stable while steadily shedding body fat. Balanced macronutrient distribution ensures training performance remains high throughout the cut.",
+    theme: "emerald",
+    goal: "Steady Fat Loss & Training Performance",
+    caloriesTarget: 1500,
+    proteinTarget: 145,
+    meals: [
+      { mealType: "breakfast", name: "Overnight Oats (40g) with Whey Protein, Blueberries & Almond Milk", calories: 320, protein: 30, carbs: 38, fat: 6, time: "07:00 AM" },
+      { mealType: "lunch", name: "Turkey Lettuce Wraps with Hummus, Cucumber & Cherry Tomatoes", calories: 350, protein: 35, carbs: 18, fat: 14, time: "12:00 PM" },
+      { mealType: "snack", name: "Apple Slices with 1 tbsp Almond Butter", calories: 180, protein: 4, carbs: 22, fat: 9, time: "03:30 PM" },
+      { mealType: "dinner", name: "Herb-Crusted Salmon Fillet (5 oz) with Roasted Brussels Sprouts", calories: 420, protein: 38, carbs: 14, fat: 24, time: "07:00 PM" },
+      { mealType: "snack", name: "Cottage Cheese (150g) with Sliced Strawberries", calories: 130, protein: 18, carbs: 10, fat: 2, time: "09:00 PM" }
+    ]
+  },
+  {
+    id: "keto-fat-loss-1550",
+    title: "Keto Fat Loss 1550 kcal",
+    badge: "Ultra-Low Carb · <30g Net Carbs",
+    description: "Strict ketogenic approach keeping net carbs under 30g daily to maintain deep nutritional ketosis. High dietary fat fuels satiety while moderate protein prevents gluconeogenesis from stalling fat adaptation.",
+    theme: "coral",
+    goal: "Ketosis-Driven Fat Oxidation",
+    caloriesTarget: 1550,
+    proteinTarget: 105,
+    meals: [
+      { mealType: "breakfast", name: "3 Scrambled Eggs in Butter with Avocado Slices & Sautéed Spinach", calories: 420, protein: 24, carbs: 6, fat: 36, time: "08:00 AM" },
+      { mealType: "lunch", name: "Tuna Salad (6 oz) with Olive Oil, Walnuts, Celery & Arugula", calories: 450, protein: 38, carbs: 5, fat: 32, time: "01:00 PM" },
+      { mealType: "snack", name: "String Cheese (2 sticks) with Macadamia Nuts (15g)", calories: 210, protein: 12, carbs: 2, fat: 17, time: "04:00 PM" },
+      { mealType: "dinner", name: "Pan-Seared Ribeye Steak (6 oz) with Garlic Butter Asparagus", calories: 470, protein: 38, carbs: 4, fat: 34, time: "07:00 PM" }
+    ]
+  },
+  {
+    id: "intermittent-fasting-16-8",
+    title: "Intermittent Fasting 16:8 (1800 kcal)",
+    badge: "Time-Restricted Eating · 8hr Window",
+    description: "All calories consumed within an 8-hour eating window (12 PM - 8 PM). The 16-hour fast enhances autophagy, insulin sensitivity, and fat mobilization while large, satisfying meals prevent hunger.",
+    theme: "pink",
+    goal: "Metabolic Flexibility & Appetite Control",
     caloriesTarget: 1800,
+    proteinTarget: 150,
+    meals: [
+      { mealType: "lunch", name: "Massive Chicken & Avocado Power Bowl: Grilled Chicken, Brown Rice, Black Beans, Avocado, Pico de Gallo", calories: 680, protein: 52, carbs: 62, fat: 22, time: "12:00 PM" },
+      { mealType: "snack", name: "Protein Smoothie: Whey, Banana, Peanut Butter & Oat Milk", calories: 380, protein: 32, carbs: 38, fat: 12, time: "03:30 PM" },
+      { mealType: "dinner", name: "Grilled Salmon (7 oz) with Roasted Sweet Potato Wedges & Steamed Green Beans", calories: 580, protein: 44, carbs: 42, fat: 22, time: "07:00 PM" },
+      { mealType: "snack", name: "Greek Yogurt (200g) with Honey Drizzle & Crushed Walnuts", calories: 220, protein: 20, carbs: 18, fat: 8, time: "08:00 PM" }
+    ]
+  },
+  {
+    id: "plant-based-fat-loss-1600",
+    title: "Plant-Based Fat Loss 1600 kcal",
+    badge: "100% Vegan · High Fiber",
+    description: "A fully vegan cutting plan rich in fiber, micronutrients, and plant protein. Strategically combines legumes, grains, and soy to form complete amino acid profiles while maintaining a caloric deficit.",
+    theme: "babyblue",
+    goal: "Vegan-Friendly Fat Loss & Nutrient Density",
+    caloriesTarget: 1600,
+    proteinTarget: 110,
+    meals: [
+      { mealType: "breakfast", name: "Tofu Scramble (200g firm tofu) with Bell Peppers, Onions, Turmeric & Whole Grain Toast", calories: 350, protein: 28, carbs: 30, fat: 12, time: "07:30 AM" },
+      { mealType: "lunch", name: "Lentil & Quinoa Power Bowl with Roasted Chickpeas, Kale & Tahini Dressing", calories: 420, protein: 28, carbs: 52, fat: 10, time: "12:30 PM" },
+      { mealType: "snack", name: "Edamame (1 cup shelled) with Sea Salt & Lime", calories: 190, protein: 18, carbs: 14, fat: 8, time: "03:30 PM" },
+      { mealType: "dinner", name: "Tempeh Stir-Fry (150g) with Brown Rice, Broccoli, Snap Peas & Ginger-Soy Glaze", calories: 460, protein: 32, carbs: 50, fat: 12, time: "07:00 PM" },
+      { mealType: "snack", name: "Pea Protein Shake with Unsweetened Almond Milk & Cacao Powder", calories: 150, protein: 25, carbs: 6, fat: 3, time: "09:00 PM" }
+    ]
+  },
+
+  // ──────────────────────────────────────────────────
+  // MAINTENANCE & LIFESTYLE PLANS
+  // ──────────────────────────────────────────────────
+  {
+    id: "balanced-maintenance-2000",
+    title: "Balanced Maintenance 2000 kcal",
+    badge: "Everyday Eating · Flexible & Balanced",
+    description: "A sustainable, well-rounded maintenance plan for everyday life. Moderate protein supports muscle retention, balanced carbs fuel daily activity, and healthy fats ensure hormonal health. No foods are off limits.",
+    theme: "emerald",
+    goal: "Sustainable Weight Maintenance & Health",
+    caloriesTarget: 2000,
     proteinTarget: 130,
     meals: [
-      { mealType: "breakfast", name: "Greek Yogurt Bowl with Chia Seeds & Berries", calories: 320, protein: 25, carbs: 35, fat: 8, time: "08:00 AM" },
-      { mealType: "lunch", name: "Grilled Chicken Breast with Quinoa & Steamed Asparagus", calories: 480, protein: 40, carbs: 45, fat: 12, time: "01:00 PM" },
-      { mealType: "snack", name: "Whey Protein Shake & Almonds", calories: 250, protein: 30, carbs: 10, fat: 10, time: "04:30 PM" },
-      { mealType: "dinner", name: "Pan-Seared Salmon with Sweet Potato & Broccoli", calories: 550, protein: 35, carbs: 40, fat: 22, time: "07:30 PM" }
+      { mealType: "breakfast", name: "2 Whole Eggs & 1 Slice Whole Grain Toast with Avocado Smash & Cherry Tomatoes", calories: 380, protein: 20, carbs: 28, fat: 22, time: "07:30 AM" },
+      { mealType: "lunch", name: "Grilled Chicken Caesar Wrap with Romaine, Parmesan & Light Dressing", calories: 480, protein: 38, carbs: 36, fat: 18, time: "12:30 PM" },
+      { mealType: "snack", name: "Mixed Nuts (30g) with a Medium Banana", calories: 280, protein: 8, carbs: 32, fat: 14, time: "03:30 PM" },
+      { mealType: "dinner", name: "Lean Beef Stir-Fry (5 oz) with Jasmine Rice, Bell Peppers & Snow Peas", calories: 560, protein: 40, carbs: 58, fat: 16, time: "07:00 PM" },
+      { mealType: "snack", name: "Low-Fat Greek Yogurt (150g) with Granola & Honey", calories: 220, protein: 16, carbs: 28, fat: 4, time: "09:00 PM" }
     ]
   },
   {
-    id: "lean-mass-bulk",
-    title: "Lean Mass Muscle Bulk",
-    badge: "High Kcal & High Clean Carbs",
-    description: "Formulated for active muscle growth, strength accumulation, and clean surplus weight gains without fat storage spillover.",
-    theme: "emerald",
-    goal: "Muscle Hypertrophy & Strength Accumulation",
-    caloriesTarget: 2850,
-    proteinTarget: 210,
-    meals: [
-      { mealType: "breakfast", name: "Oatmeal with Peanut Butter, Whey, & Bananas", calories: 650, protein: 45, carbs: 85, fat: 18, time: "07:30 AM" },
-      { mealType: "lunch", name: "Extra Lean Beef Patty, Jasmine Rice, & Avocado", calories: 750, protein: 50, carbs: 70, fat: 24, time: "12:30 PM" },
-      { mealType: "snack", name: "Cottage Cheese, Honey, & Rice Cakes", calories: 350, protein: 30, carbs: 45, fat: 4, time: "04:00 PM" },
-      { mealType: "dinner", name: "Grilled Chicken Breast, Sweet Potato Mash, & Green Beans", calories: 600, protein: 45, carbs: 65, fat: 12, time: "07:00 PM" },
-      { mealType: "snack", name: "Cashew Nuts & Casein Protein Shake", calories: 500, protein: 40, carbs: 20, fat: 22, time: "09:30 PM" }
-    ]
-  },
-  {
-    id: "keto-conditioning",
-    title: "Keto Conditioning & Fat Loss",
-    badge: "Low Carb & High Healthy Fats",
-    description: "Supports metabolic state alterations, cellular fat utilization, and muscle preservation during rigorous cutting cycles.",
+    id: "mediterranean-diet-2100",
+    title: "Mediterranean Diet 2100 kcal",
+    badge: "Heart-Healthy · Anti-Aging",
+    description: "Inspired by the traditional eating patterns of Greece, Italy, and Spain. Centers on extra-virgin olive oil, wild-caught fish, whole grains, legumes, and abundant vegetables. Proven to reduce cardiovascular risk.",
     theme: "coral",
-    goal: "Aggressive Fat Loss & Keto Adaptation",
-    caloriesTarget: 1550,
-    proteinTarget: 103,
+    goal: "Cardiovascular Health & Longevity",
+    caloriesTarget: 2100,
+    proteinTarget: 120,
     meals: [
-      { mealType: "breakfast", name: "3 Scrambled Eggs with Spinach, Feta & Butter", calories: 400, protein: 25, carbs: 4, fat: 32, time: "08:30 AM" },
-      { mealType: "lunch", name: "Tuna Salad with Olive Oil, Cucumber & Walnuts", calories: 450, protein: 35, carbs: 6, fat: 34, time: "01:30 PM" },
-      { mealType: "snack", name: "Avocado with Sea Salt & Celery Sticks", calories: 200, protein: 3, carbs: 8, fat: 18, time: "04:30 PM" },
-      { mealType: "dinner", name: "Grilled Ribeye Steak with Asparagus & Garlic Butter", calories: 500, protein: 40, carbs: 2, fat: 38, time: "07:30 PM" }
+      { mealType: "breakfast", name: "Mediterranean Breakfast Plate: Whole Grain Pita, Labneh, Cucumber, Tomato, Olives & Drizzle of Olive Oil", calories: 380, protein: 14, carbs: 40, fat: 18, time: "08:00 AM" },
+      { mealType: "lunch", name: "Grilled Sea Bass (6 oz) with Farro Salad, Sun-Dried Tomatoes, Capers & Lemon-Herb Vinaigrette", calories: 520, protein: 38, carbs: 46, fat: 18, time: "01:00 PM" },
+      { mealType: "snack", name: "Hummus (3 tbsp) with Carrot Sticks, Cucumber & Whole Wheat Crackers", calories: 220, protein: 8, carbs: 26, fat: 10, time: "04:00 PM" },
+      { mealType: "dinner", name: "Herb-Roasted Chicken Thighs with Roasted Eggplant, Zucchini & Quinoa Tabbouleh", calories: 580, protein: 40, carbs: 44, fat: 24, time: "07:30 PM" },
+      { mealType: "snack", name: "Fresh Figs (3) with Walnuts (20g) & a Drizzle of Honey", calories: 250, protein: 5, carbs: 34, fat: 12, time: "09:00 PM" }
     ]
   },
   {
-    id: "calisthenics-shred",
-    title: "Calisthenics Lean Shred Diet",
-    badge: "High Protein & Lean Strength Focus",
-    description: "Designed specifically for bodyweight athletes. Minimizes body fat to maximize relative strength and leverage outputs.",
+    id: "anti-inflammatory-recovery-1900",
+    title: "Anti-Inflammatory Recovery 1900 kcal",
+    badge: "Omega-3 Rich · Antioxidant Dense",
+    description: "Designed around anti-inflammatory superfoods: wild salmon, turmeric, ginger, dark leafy greens, berries, and extra-virgin olive oil. Ideal for athletes managing joint stress, chronic soreness, or recovery from injury.",
     theme: "pink",
-    goal: "Optimal Power-to-Bodyweight Leverage",
-    caloriesTarget: 2200,
-    proteinTarget: 162,
+    goal: "Reduce Inflammation & Accelerate Recovery",
+    caloriesTarget: 1900,
+    proteinTarget: 130,
     meals: [
-      { mealType: "breakfast", name: "Egg White Omelette with Whole Wheat Toast", calories: 380, protein: 30, carbs: 35, fat: 8, time: "08:00 AM" },
-      { mealType: "lunch", name: "Baked Turkey Breast with Brown Rice & Zucchini", calories: 550, protein: 45, carbs: 55, fat: 10, time: "01:00 PM" },
-      { mealType: "snack", name: "Greek Yogurt with Raspberries & Walnuts", calories: 270, protein: 22, carbs: 20, fat: 12, time: "04:30 PM" },
-      { mealType: "dinner", name: "White Fish Fillet (Cod) with Quinoa & Salad", calories: 500, protein: 40, carbs: 40, fat: 8, time: "07:30 PM" },
-      { mealType: "snack", name: "Low Fat Cottage Cheese & Mixed Berries", calories: 500, protein: 35, carbs: 15, fat: 2, time: "09:30 PM" }
+      { mealType: "breakfast", name: "Anti-Inflammatory Smoothie Bowl: Blueberries, Tart Cherry Juice, Spinach, Turmeric, Ginger, Flaxseed & Whey", calories: 350, protein: 28, carbs: 42, fat: 8, time: "07:30 AM" },
+      { mealType: "lunch", name: "Wild Salmon Poke Bowl (5 oz) with Brown Rice, Edamame, Avocado, Seaweed & Ginger-Sesame Dressing", calories: 520, protein: 36, carbs: 48, fat: 18, time: "12:30 PM" },
+      { mealType: "snack", name: "Golden Turmeric Latte (Oat Milk) with Walnuts (20g)", calories: 200, protein: 6, carbs: 14, fat: 14, time: "03:30 PM" },
+      { mealType: "dinner", name: "Herb-Baked Mackerel (6 oz) with Roasted Beets, Sweet Potato & Sautéed Kale", calories: 550, protein: 38, carbs: 44, fat: 22, time: "07:00 PM" },
+      { mealType: "snack", name: "Tart Cherry Juice (8 oz) with Dark Chocolate (20g, 85% cacao)", calories: 210, protein: 3, carbs: 32, fat: 8, time: "09:00 PM" }
+    ]
+  },
+  {
+    id: "vegetarian-balanced-2000",
+    title: "Vegetarian Balanced 2000 kcal",
+    badge: "Lacto-Ovo Vegetarian · Complete Nutrition",
+    description: "A nutritionally complete lacto-ovo vegetarian plan that hits all essential amino acids through strategic food combining. Eggs, dairy, legumes, and grains provide quality protein without any meat.",
+    theme: "babyblue",
+    goal: "Vegetarian Wellness & Complete Protein",
+    caloriesTarget: 2000,
+    proteinTarget: 115,
+    meals: [
+      { mealType: "breakfast", name: "Veggie Frittata (3 eggs) with Mushrooms, Bell Peppers, Feta & Whole Grain Toast", calories: 420, protein: 28, carbs: 28, fat: 22, time: "07:30 AM" },
+      { mealType: "lunch", name: "Black Bean & Sweet Potato Buddha Bowl with Quinoa, Corn, Lime-Cilantro Dressing & Cotija Cheese", calories: 520, protein: 24, carbs: 68, fat: 14, time: "12:30 PM" },
+      { mealType: "snack", name: "Greek Yogurt Parfait (200g) with Granola, Sliced Almonds & Honey", calories: 280, protein: 18, carbs: 34, fat: 8, time: "03:30 PM" },
+      { mealType: "dinner", name: "Paneer Tikka Masala (150g paneer) with Basmati Rice & Raita", calories: 580, protein: 30, carbs: 56, fat: 24, time: "07:00 PM" },
+      { mealType: "snack", name: "Warm Milk (250ml) with a Handful of Pistachios (20g)", calories: 230, protein: 14, carbs: 16, fat: 12, time: "09:30 PM" }
+    ]
+  },
+
+  // ──────────────────────────────────────────────────
+  // MUSCLE BUILDING & BULKING PLANS
+  // ──────────────────────────────────────────────────
+  {
+    id: "clean-lean-bulk-2800",
+    title: "Clean Lean Bulk 2800 kcal",
+    badge: "Moderate Surplus · High Protein",
+    description: "A disciplined lean bulk providing a 300-500 calorie surplus with emphasis on whole food protein sources. Designed to maximize muscle protein synthesis with minimal fat gain through timed nutrient delivery.",
+    theme: "emerald",
+    goal: "Lean Muscle Gain & Minimal Fat Accumulation",
+    caloriesTarget: 2800,
+    proteinTarget: 200,
+    meals: [
+      { mealType: "breakfast", name: "Oatmeal (80g) with Whey Protein, Banana, Peanut Butter (1 tbsp) & Cinnamon", calories: 550, protein: 40, carbs: 68, fat: 14, time: "07:00 AM" },
+      { mealType: "lunch", name: "Grilled Chicken Breast (8 oz) with Jasmine Rice (1 cup cooked), Steamed Broccoli & Teriyaki Glaze", calories: 620, protein: 52, carbs: 68, fat: 10, time: "12:00 PM" },
+      { mealType: "snack", name: "Rice Cakes (3) with Cottage Cheese (200g) & Sliced Banana", calories: 340, protein: 24, carbs: 48, fat: 4, time: "03:30 PM" },
+      { mealType: "dinner", name: "Lean Ground Beef Pasta (93/7, 6 oz) with Whole Wheat Penne, Marinara & Side Salad", calories: 680, protein: 48, carbs: 72, fat: 18, time: "07:00 PM" },
+      { mealType: "snack", name: "Casein Protein Shake with Whole Milk (250ml) & Almonds (20g)", calories: 380, protein: 36, carbs: 18, fat: 18, time: "09:30 PM" }
+    ]
+  },
+  {
+    id: "mass-gain-power-bulk-3500",
+    title: "Mass Gain Power Bulk 3500 kcal",
+    badge: "Aggressive Surplus · Hardgainer Protocol",
+    description: "An aggressive caloric surplus designed for hardgainers and ectomorphs who struggle to gain weight. Six meals spread throughout the day ensure a constant anabolic environment with emphasis on calorie-dense whole foods.",
+    theme: "coral",
+    goal: "Maximum Muscle & Weight Gain for Hardgainers",
+    caloriesTarget: 3500,
+    proteinTarget: 220,
+    meals: [
+      { mealType: "breakfast", name: "4-Egg Omelette with Cheese, Turkey Sausage, Hash Browns & Orange Juice", calories: 720, protein: 44, carbs: 60, fat: 32, time: "07:00 AM" },
+      { mealType: "snack", name: "Mass Gainer Shake: Whey, Oats (50g), Banana, Peanut Butter (2 tbsp) & Whole Milk", calories: 650, protein: 42, carbs: 72, fat: 20, time: "10:00 AM" },
+      { mealType: "lunch", name: "Double Chicken Breast (10 oz) with White Rice (1.5 cups), Black Beans & Guacamole", calories: 780, protein: 58, carbs: 82, fat: 20, time: "01:00 PM" },
+      { mealType: "snack", name: "Bagel with Cream Cheese, Smoked Salmon & Capers", calories: 420, protein: 24, carbs: 44, fat: 16, time: "04:00 PM" },
+      { mealType: "dinner", name: "8 oz Sirloin Steak with Baked Potato (loaded with butter & sour cream), Steamed Asparagus", calories: 720, protein: 50, carbs: 52, fat: 32, time: "07:30 PM" },
+      { mealType: "snack", name: "Peanut Butter & Jelly Sandwich on Whole Wheat with Casein Shake", calories: 480, protein: 32, carbs: 52, fat: 16, time: "10:00 PM" }
+    ]
+  },
+  {
+    id: "plant-based-muscle-2600",
+    title: "Plant-Based Muscle 2600 kcal",
+    badge: "100% Vegan · Complete Aminos",
+    description: "A vegan bulking plan that strategically pairs complementary proteins (rice + beans, soy + grains) to deliver all essential amino acids. Leverages tempeh, seitan, tofu, legumes, and pea protein for muscle growth.",
+    theme: "pink",
+    goal: "Vegan Muscle Hypertrophy & Strength",
+    caloriesTarget: 2600,
+    proteinTarget: 155,
+    meals: [
+      { mealType: "breakfast", name: "High-Protein Oatmeal (80g) with Pea Protein, Soy Milk, Banana, Chia Seeds & Maple Syrup", calories: 520, protein: 34, carbs: 72, fat: 10, time: "07:00 AM" },
+      { mealType: "lunch", name: "Seitan Stir-Fry (200g) with Brown Rice, Broccoli, Carrots & Peanut Sauce", calories: 620, protein: 48, carbs: 64, fat: 16, time: "12:00 PM" },
+      { mealType: "snack", name: "Pea Protein Smoothie with Oat Milk, Frozen Mango & Spinach", calories: 300, protein: 28, carbs: 36, fat: 4, time: "03:30 PM" },
+      { mealType: "dinner", name: "Baked Tofu (250g extra-firm) with Quinoa, Roasted Sweet Potato & Tahini Drizzle", calories: 580, protein: 36, carbs: 62, fat: 18, time: "07:00 PM" },
+      { mealType: "snack", name: "Whole Wheat Bread (2 slices) with Almond Butter (2 tbsp) & Sliced Banana", calories: 420, protein: 14, carbs: 50, fat: 20, time: "09:30 PM" }
+    ]
+  },
+
+  // ──────────────────────────────────────────────────
+  // SPORT-SPECIFIC PLANS
+  // ──────────────────────────────────────────────────
+  {
+    id: "endurance-athlete-fuel-2400",
+    title: "Endurance Athlete Fuel 2400 kcal",
+    badge: "High Carb · Glycogen Loading",
+    description: "Optimized for runners, cyclists, swimmers, and endurance athletes. Carbohydrate-dominant macros (55-60%) maximize glycogen stores, while moderate protein supports recovery between long training sessions.",
+    theme: "babyblue",
+    goal: "Endurance Performance & Glycogen Optimization",
+    caloriesTarget: 2400,
+    proteinTarget: 120,
+    meals: [
+      { mealType: "breakfast", name: "Banana Pancakes (3) with Maple Syrup, Berries & a Side of Scrambled Eggs (2)", calories: 520, protein: 22, carbs: 76, fat: 14, time: "06:30 AM" },
+      { mealType: "snack", name: "Energy Bar (homemade oat & date) with a Large Banana", calories: 320, protein: 8, carbs: 60, fat: 8, time: "10:00 AM" },
+      { mealType: "lunch", name: "Whole Wheat Pasta (2 cups) with Grilled Chicken (5 oz), Marinara Sauce & Side Salad", calories: 620, protein: 40, carbs: 78, fat: 14, time: "01:00 PM" },
+      { mealType: "snack", name: "PB&J Rice Cakes (3) with Natural Peanut Butter & Jam", calories: 280, protein: 10, carbs: 40, fat: 10, time: "04:00 PM" },
+      { mealType: "dinner", name: "Teriyaki Salmon (6 oz) with White Rice (1 cup), Steamed Bok Choy & Miso Soup", calories: 560, protein: 38, carbs: 56, fat: 16, time: "07:30 PM" }
+    ]
+  },
+  {
+    id: "calisthenics-lean-performance-2200",
+    title: "Calisthenics Lean Performance 2200 kcal",
+    badge: "Optimal Power-to-Weight · Bodyweight Focus",
+    description: "Engineered for bodyweight athletes pursuing skills like muscle-ups, planches, and front levers. Keeps body fat low to maximize relative strength while providing enough fuel for progressive overload and skill work.",
+    theme: "emerald",
+    goal: "Power-to-Weight Ratio & Relative Strength",
+    caloriesTarget: 2200,
+    proteinTarget: 165,
+    meals: [
+      { mealType: "breakfast", name: "Egg White Omelette (6 whites, 1 whole) with Whole Wheat Toast, Avocado & Tomato", calories: 380, protein: 32, carbs: 30, fat: 14, time: "07:30 AM" },
+      { mealType: "lunch", name: "Herb-Grilled Turkey Breast (7 oz) with Brown Rice, Zucchini & Bell Peppers", calories: 520, protein: 48, carbs: 50, fat: 10, time: "12:30 PM" },
+      { mealType: "snack", name: "Greek Yogurt (200g) with Raspberries, Walnuts (15g) & Honey", calories: 260, protein: 22, carbs: 24, fat: 10, time: "04:00 PM" },
+      { mealType: "dinner", name: "Baked Cod Fillet (7 oz) with Quinoa, Roasted Asparagus & Lemon-Dill Sauce", calories: 480, protein: 44, carbs: 40, fat: 12, time: "07:30 PM" },
+      { mealType: "snack", name: "Low-Fat Cottage Cheese (200g) with Pineapple Chunks & Cinnamon", calories: 180, protein: 24, carbs: 16, fat: 2, time: "09:30 PM" }
+    ]
+  },
+  {
+    id: "combat-sport-recomp-2000",
+    title: "Combat Sport Recomp 2000 kcal",
+    badge: "Weight Class Management · High Protein",
+    description: "Built for fighters, wrestlers, and martial artists who need to maintain or make weight while building functional strength. Ultra-high protein protects muscle during weight manipulation, while moderate carbs fuel explosive training.",
+    theme: "coral",
+    goal: "Weight Class Management & Combat Performance",
+    caloriesTarget: 2000,
+    proteinTarget: 175,
+    meals: [
+      { mealType: "breakfast", name: "3 Whole Eggs Scrambled with Turkey Bacon (3 slices), Spinach & Whole Grain English Muffin", calories: 420, protein: 36, carbs: 28, fat: 18, time: "07:00 AM" },
+      { mealType: "lunch", name: "Grilled Chicken Breast (7 oz) with Sweet Potato (medium), Steamed Broccoli & Hot Sauce", calories: 500, protein: 50, carbs: 46, fat: 8, time: "12:00 PM" },
+      { mealType: "snack", name: "Whey Protein Shake (2 scoops) with Water & a Small Apple", calories: 280, protein: 48, carbs: 20, fat: 2, time: "03:30 PM" },
+      { mealType: "dinner", name: "Lean Bison Burger Patty (6 oz, no bun) with Mixed Green Salad, Olive Oil & Balsamic", calories: 450, protein: 42, carbs: 10, fat: 28, time: "07:00 PM" },
+      { mealType: "snack", name: "Casein Protein Pudding (1 scoop mixed thick) with Sliced Almonds (10g)", calories: 180, protein: 26, carbs: 8, fat: 5, time: "09:30 PM" }
+    ]
+  },
+  {
+    id: "pre-contest-bodybuilding-1700",
+    title: "Pre-Contest Bodybuilding 1700 kcal",
+    badge: "Peak Week · Precision Macros",
+    description: "A competition-prep diet for the final 4-8 weeks before a bodybuilding show. Extremely precise macro targets, meal timing, and food selection designed to strip the last layers of subcutaneous fat while maintaining maximum muscle fullness.",
+    theme: "pink",
+    goal: "Stage-Ready Conditioning & Maximum Definition",
+    caloriesTarget: 1700,
+    proteinTarget: 190,
+    meals: [
+      { mealType: "breakfast", name: "Egg Whites (8) with Cream of Rice (40g dry), Cinnamon & Sugar-Free Syrup", calories: 310, protein: 36, carbs: 32, fat: 2, time: "06:00 AM" },
+      { mealType: "snack", name: "Tilapia Fillet (5 oz) with Jasmine Rice (80g cooked) & Asparagus (6 spears)", calories: 280, protein: 34, carbs: 28, fat: 4, time: "09:00 AM" },
+      { mealType: "lunch", name: "Chicken Breast (7 oz) with Sweet Potato (medium) & Green Beans", calories: 440, protein: 50, carbs: 40, fat: 6, time: "12:00 PM" },
+      { mealType: "snack", name: "Whey Isolate (1 scoop) with Rice Cakes (2) & 10 Raw Almonds", calories: 250, protein: 28, carbs: 22, fat: 6, time: "03:00 PM" },
+      { mealType: "dinner", name: "Extra-Lean Ground Turkey (6 oz) with Steamed Spinach, Mushrooms & 1 tsp Olive Oil", calories: 320, protein: 40, carbs: 6, fat: 14, time: "06:00 PM" },
+      { mealType: "snack", name: "Casein Protein (1 scoop) mixed with Water & Cinnamon", calories: 120, protein: 24, carbs: 3, fat: 1, time: "09:00 PM" }
     ]
   }
 ]

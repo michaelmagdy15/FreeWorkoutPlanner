@@ -104,12 +104,20 @@ export default function AdminPortal() {
             </div>
           </div>
 
-          <Link href="/">
-            <Button variant="outline" className="rounded-xl border-white/5 bg-slate-900/30 hover:bg-slate-900/60 flex items-center gap-2 text-xs">
-              <Home className="w-4 h-4 text-slate-400" />
-              Client Dashboard
-            </Button>
-          </Link>
+          <div className="flex gap-2">
+            <Link href="/admin/trainer">
+              <Button variant="outline" className="rounded-xl border-amber-500/20 bg-amber-500/5 hover:bg-amber-500/15 flex items-center gap-2 text-xs text-amber-400 hover:text-amber-300">
+                <Users className="w-4 h-4" />
+                Trainer Dashboard
+              </Button>
+            </Link>
+            <Link href="/">
+              <Button variant="outline" className="rounded-xl border-white/5 bg-slate-900/30 hover:bg-slate-900/60 flex items-center gap-2 text-xs">
+                <Home className="w-4 h-4 text-slate-400" />
+                Client Dashboard
+              </Button>
+            </Link>
+          </div>
         </header>
 
         {/* METRIC STATS OVERVIEW CARD GRID */}
