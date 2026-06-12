@@ -9,7 +9,7 @@ export const contextViewerTool = {
   },
   handler: async ({ userId }: { userId: string }) => {
     try {
-      const context = memoryStore.getContext(userId);
+      const context = await memoryStore.getContext(userId);
 
       let contextSummary = "📊 **Your Health & Fitness Summary**\n\n";
 

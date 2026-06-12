@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { planStore } from '@/lib/stores'
+import { serverDatabases, databaseId } from '@/lib/appwrite-server'
+import { Query, ID } from 'node-appwrite'
 
 export async function POST(request: NextRequest) {
   let userId: string | undefined;
@@ -15,12 +16,24 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Retrieve existing plan from store if any, to allow merging
-    const existingPlan = planStore.get(userId) || { workouts: [], meals: [], recommendations: [] }
+    // Retrieve existing plan from Appwrite Databases if any, to allow merging
+    let existingPlan = { workouts: [], meals: [], recommendations: [] };
+    try {
+      const existing = await serverDatabases.listDocuments(
+        databaseId,
+        'plans',
+        [Query.equal('userId', userId), Query.limit(1)]
+      );
+      if (existing.documents.length > 0) {
+        existingPlan = JSON.parse(existing.documents[0].structuredPlan);
+      }
+    } catch (err) {
+      console.log('No existing plan found for merge, starting fresh.');
+    }
 
     // If we have custom exercises or meals, merge and store them
     if (customPlan || customMeals) {
-      console.log('📋 Merging custom workouts/meals into active plan store:', { workouts: !!customPlan, meals: !!customMeals })
+      console.log('📋 Merging custom workouts/meals into active Appwrite plan:', { workouts: !!customPlan, meals: !!customMeals })
       
       const planText = generateContextualPlanText(planType, userMessage)
       const structuredPlan = {
@@ -58,9 +71,8 @@ export async function POST(request: NextRequest) {
         ]
       }
 
-      // Store the plan in memory for retrieval by context API
-      planStore.set(userId, structuredPlan)
-      console.log('💾 Stored merged plan for user:', userId, structuredPlan)
+      // Store the plan in Appwrite Database
+      await savePlanToAppwrite(userId, structuredPlan)
       
       return NextResponse.json({
         success: true,
@@ -116,9 +128,8 @@ export async function POST(request: NextRequest) {
     // Generate structured plan data  
     const structuredPlan = generateStructuredPlan(planText, userId, planType)
 
-    // Store the plan in memory for retrieval by context API
-    planStore.set(userId, structuredPlan)
-    console.log('💾 Stored MCP plan for user:', userId, structuredPlan)
+    // Store the plan in Appwrite Database
+    await savePlanToAppwrite(userId, structuredPlan)
 
     return NextResponse.json({
       success: true,
@@ -133,11 +144,39 @@ export async function POST(request: NextRequest) {
     
     // Store the fallback plan as well
     if (userId) {
-      planStore.set(userId, fallbackPlan.structuredPlan)
-      console.log('💾 Stored fallback plan for user:', userId, fallbackPlan.structuredPlan)
+      await savePlanToAppwrite(userId, fallbackPlan.structuredPlan)
     }
     
     return NextResponse.json(fallbackPlan)
+  }
+}
+
+async function savePlanToAppwrite(userId: string, structuredPlan: any) {
+  try {
+    // 1. Delete existing plans for this user to keep only the latest one
+    const existing = await serverDatabases.listDocuments(
+      databaseId,
+      'plans',
+      [Query.equal('userId', userId)]
+    );
+    for (const doc of existing.documents) {
+      await serverDatabases.deleteDocument(databaseId, 'plans', doc.$id);
+    }
+    
+    // 2. Create the new plan document
+    await serverDatabases.createDocument(
+      databaseId,
+      'plans',
+      ID.unique(),
+      {
+        userId,
+        structuredPlan: JSON.stringify(structuredPlan),
+        updatedAt: new Date().toISOString()
+      }
+    );
+    console.log(`✅ Saved new Appwrite plan for ${userId}`)
+  } catch (err) {
+    console.error('Failed to save plan in Appwrite:', err)
   }
 }
 
@@ -259,10 +298,9 @@ function generateFallbackPlan(planType: string, userMessage: string) {
 }
 
 function generateStructuredPlan(planText: string, userId: string, planType: string) {
-  // Return plan based on type
   if (planType === 'nutrition') {
     return generateFallbackPlan(planType, '').structuredPlan
   } else {
     return generateFallbackPlan('workout', '').structuredPlan
   }
-} 
+}

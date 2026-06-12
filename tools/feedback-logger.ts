@@ -21,7 +21,7 @@ export const feedbackLoggerTool = {
         notes,
       };
 
-      memoryStore.addEntry(userId, feedbackEntry);
+      await memoryStore.addEntry(userId, feedbackEntry);
 
       return {
         content: [

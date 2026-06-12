@@ -11,7 +11,7 @@ export const planGeneratorTool = {
   handler: async ({ userId }: { userId: string }) => {
     try {
       // Get user's complete context
-      const context = memoryStore.getContext(userId);
+      const context = await memoryStore.getContext(userId);
 
       // Generate personalized plan using LLM
       const plan = await generatePlan(context);

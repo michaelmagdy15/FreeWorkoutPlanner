@@ -27,7 +27,7 @@ export const nutritionLoggerTool = {
         calories,
       };
 
-      memoryStore.addEntry(userId, nutritionEntry);
+      await memoryStore.addEntry(userId, nutritionEntry);
 
       return {
         content: [

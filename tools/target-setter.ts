@@ -24,7 +24,7 @@ export const targetSetterTool = {
         calorieBudget,
       };
 
-      memoryStore.setWeeklyTarget(userId, target);
+      await memoryStore.setWeeklyTarget(userId, target);
 
       return {
         content: [

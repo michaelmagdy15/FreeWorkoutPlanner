@@ -27,7 +27,7 @@ export const workoutLoggerTool = {
         ...(distance && { distance }),
       };
 
-      memoryStore.addEntry(userId, workoutEntry);
+      await memoryStore.addEntry(userId, workoutEntry);
 
       return {
         content: [

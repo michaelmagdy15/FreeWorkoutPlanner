@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { workoutStore, nutritionStore, activitiesStore } from '@/lib/stores'
+import { serverDatabases, databaseId } from '@/lib/appwrite-server'
+import { ID, Query } from 'node-appwrite'
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
@@ -7,39 +8,65 @@ export async function GET(request: NextRequest) {
   const userId = searchParams.get('userId') || 'default-user'
   
   if (action === 'debug') {
-    // Debug endpoint to check store contents
-    const userWorkouts = workoutStore.get(userId) || []
-    const userNutrition = nutritionStore.get(userId) || []
-    const userActivities = activitiesStore.get(userId) || []
-    
-    return NextResponse.json({
-      workouts: userWorkouts,
-      nutrition: userNutrition,
-      activities: userActivities,
-      totals: {
-        workoutMinutes: userWorkouts.reduce((sum: number, w: any) => sum + (w.duration || 0), 0),
-        calories: userNutrition.reduce((sum: number, n: any) => sum + (n.calories || 0), 0),
-        steps: userActivities
-          .filter((a: any) => a.type === 'steps')
-          .reduce((sum: number, a: any) => sum + (a.count || 0), 0),
-        water: userActivities
-          .filter((a: any) => a.type === 'water')
-          .reduce((sum: number, a: any) => sum + (a.amount || 0), 0),
-      }
-    })
+    try {
+      const workoutsRes = await serverDatabases.listDocuments(databaseId, 'workouts', [Query.equal('userId', userId), Query.limit(100)]);
+      const nutritionRes = await serverDatabases.listDocuments(databaseId, 'nutrition', [Query.equal('userId', userId), Query.limit(100)]);
+      const activitiesRes = await serverDatabases.listDocuments(databaseId, 'activities', [Query.equal('userId', userId), Query.limit(100)]);
+      
+      const userWorkouts = workoutsRes.documents;
+      const userNutrition = nutritionRes.documents;
+      const userActivities = activitiesRes.documents;
+      
+      return NextResponse.json({
+        workouts: userWorkouts,
+        nutrition: userNutrition,
+        activities: userActivities,
+        totals: {
+          workoutMinutes: userWorkouts.reduce((sum: number, w: any) => sum + (w.duration || 0), 0),
+          calories: userNutrition.reduce((sum: number, n: any) => sum + (n.calories || 0), 0),
+          steps: userActivities
+            .filter((a: any) => a.type === 'steps')
+            .reduce((sum: number, a: any) => sum + (a.count || 0), 0),
+          water: userActivities
+            .filter((a: any) => a.type === 'water')
+            .reduce((sum: number, a: any) => sum + (a.amount || 0), 0),
+        }
+      });
+    } catch (err) {
+      console.error('Error in debug GET handler:', err);
+      return NextResponse.json({ error: 'Failed to retrieve debug information' }, { status: 500 });
+    }
   }
   
   if (action === 'testStore') {
-    // Test if stores are working
-    const testData = { test: 'data', timestamp: new Date().toISOString() }
-    workoutStore.set('test', testData)
-    const retrieved = workoutStore.get('test')
-    
-    return NextResponse.json({
-      stored: testData,
-      retrieved: retrieved,
-      working: JSON.stringify(testData) === JSON.stringify(retrieved)
-    })
+    try {
+      const testDoc = await serverDatabases.createDocument(
+        databaseId,
+        'workouts',
+        ID.unique(),
+        {
+          userId: 'test',
+          name: 'Test Setup Workout',
+          type: 'cardio',
+          duration: 5,
+          completed: false,
+          timestamp: new Date().toISOString()
+        }
+      );
+      
+      await serverDatabases.deleteDocument(databaseId, 'workouts', testDoc.$id);
+      
+      return NextResponse.json({
+        working: true,
+        message: 'Successfully verified connection to Appwrite'
+      });
+    } catch (err) {
+      console.error('Test store connection failed:', err);
+      return NextResponse.json({
+        working: false,
+        error: err instanceof Error ? err.message : 'Unknown Appwrite error'
+      });
+    }
   }
   
   return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
@@ -94,13 +121,13 @@ export async function POST(request: NextRequest) {
         break
 
       case 'activity':
-        // Activities like steps, water, sleep, weight - store locally only for now
-        console.log('💾 Storing activity locally (no MCP tool for activities yet)...')
-        storeActivityLocally(userId, entryData)
+        // Activities like steps, water, sleep, weight - store in Appwrite Databases
+        console.log('💾 Storing activity in Appwrite Databases...')
+        await storeActivityInAppwrite(userId, entryData)
         return NextResponse.json({ 
           success: true, 
           message: 'Activity logged successfully',
-          stored: 'locally'
+          stored: 'appwrite'
         })
 
       default:
@@ -110,9 +137,9 @@ export async function POST(request: NextRequest) {
         )
     }
 
-    // Store data locally FIRST (regardless of MCP status)
-    console.log('💾 Storing data locally regardless of MCP status...')
-    storeDataLocally(userId, entryType, entryData)
+    // Store data in Appwrite Database FIRST
+    console.log('💾 Storing data in Appwrite Database...')
+    await storeDataInAppwrite(userId, entryType, entryData)
 
     // Try to call MCP tool (but don't fail if it's not available)
     try {
@@ -148,12 +175,12 @@ export async function POST(request: NextRequest) {
         stored: 'both'
       })
     } catch (error) {
-      console.error('MCP failed, but data already stored locally:', error)
+      console.error('MCP failed, but data already stored in Appwrite:', error)
       
       return NextResponse.json({ 
         success: true, 
-        message: 'Entry logged locally (MCP unavailable)',
-        stored: 'locally'
+        message: 'Entry logged in Appwrite (MCP tool execution skipped/failed)',
+        stored: 'appwrite'
       })
     }
 
@@ -166,67 +193,70 @@ export async function POST(request: NextRequest) {
   }
 }
 
-function storeDataLocally(userId: string, entryType: string, entryData: any) {
+async function storeDataInAppwrite(userId: string, entryType: string, entryData: any) {
   const timestamp = new Date().toISOString()
-  const id = Date.now().toString()
 
   if (entryType === 'workout' && entryData.workout) {
-    const userWorkouts = workoutStore.get(userId) || []
     const workoutEntry = {
-      id,
-      timestamp,
+      userId,
       type: entryData.workout.type || 'strength',
       name: entryData.workout.name || 'Unknown Exercise',
       duration: entryData.workout.duration || 30,
-      sets: entryData.workout.sets || 3,
-      reps: entryData.workout.reps || 10,
-      weight: entryData.workout.weight,
-      distance: entryData.workout.distance,
-      caloriesBurned: entryData.workout.caloriesBurned,
+      sets: entryData.workout.sets || null,
+      reps: entryData.workout.reps || null,
+      weight: entryData.workout.weight || null,
+      distance: entryData.workout.distance || null,
+      caloriesBurned: entryData.workout.caloriesBurned || null,
       completed: true,
+      timestamp: entryData.workout.timestamp || timestamp,
     }
-    userWorkouts.push(workoutEntry)
-    workoutStore.set(userId, userWorkouts)
-    console.log(`✅ Stored workout for ${userId}:`, workoutEntry)
+    await serverDatabases.createDocument(databaseId, 'workouts', ID.unique(), workoutEntry)
+    console.log(`✅ Stored workout in Appwrite for ${userId}:`, workoutEntry)
   }
 
   if (entryType === 'nutrition' && entryData.nutrition) {
-    const userNutrition = nutritionStore.get(userId) || []
     const nutritionEntry = {
-      id,
-      timestamp,
+      userId,
       mealType: entryData.nutrition.mealType || 'snack',
       foodItem: entryData.nutrition.foodItem || 'Unknown Food',
       calories: entryData.nutrition.calories || 0,
-      protein: entryData.nutrition.protein || 0,
-      carbs: entryData.nutrition.carbs || 0,
-      fat: entryData.nutrition.fat || 0,
+      protein: entryData.nutrition.protein || null,
+      carbs: entryData.nutrition.carbs || null,
+      fat: entryData.nutrition.fat || null,
+      timestamp: entryData.nutrition.timestamp || timestamp,
     }
-    userNutrition.push(nutritionEntry)
-    nutritionStore.set(userId, userNutrition)
-    console.log(`✅ Stored nutrition for ${userId}:`, nutritionEntry)
+    await serverDatabases.createDocument(databaseId, 'nutrition', ID.unique(), nutritionEntry)
+    console.log(`✅ Stored nutrition in Appwrite for ${userId}:`, nutritionEntry)
   }
 
   if (entryType === 'feedback' && entryData.feedback) {
-    // For now, just log feedback but don't store it
-    console.log(`✅ Feedback for ${userId}:`, entryData.feedback)
+    const feedbackEntry = {
+      userId,
+      type: entryData.feedback.type || 'progress',
+      notes: entryData.feedback.notes || '',
+      rating: entryData.feedback.rating || null,
+      timestamp: entryData.feedback.timestamp || timestamp,
+    }
+    await serverDatabases.createDocument(databaseId, 'feedback', ID.unique(), feedbackEntry)
+    console.log(`✅ Stored feedback in Appwrite for ${userId}:`, feedbackEntry)
   }
 }
 
-function storeActivityLocally(userId: string, entryData: any) {
+async function storeActivityInAppwrite(userId: string, entryData: any) {
   const timestamp = new Date().toISOString()
-  const id = Date.now().toString()
 
   if (entryData.activity) {
-    const userActivities = activitiesStore.get(userId) || []
     const activityEntry = {
-      id,
-      timestamp,
+      userId,
       type: entryData.activity.type,
-      ...entryData.activity
+      count: entryData.activity.count || null,
+      amount: entryData.activity.amount || null,
+      duration: entryData.activity.duration || null,
+      value: entryData.activity.value || null,
+      unit: entryData.activity.unit || 'units',
+      timestamp: entryData.activity.timestamp || timestamp,
     }
-    userActivities.push(activityEntry)
-    activitiesStore.set(userId, userActivities)
-    console.log(`✅ Stored activity for ${userId}:`, activityEntry)
+    await serverDatabases.createDocument(databaseId, 'activities', ID.unique(), activityEntry)
+    console.log(`✅ Stored activity in Appwrite for ${userId}:`, activityEntry)
   }
-} 
+}

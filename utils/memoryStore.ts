@@ -1,52 +1,153 @@
 import { WorkoutEntry, NutritionEntry, FeedbackEntry, WeeklyTarget } from '../types/entries';
 import { CombinedContext } from '../types/context';
+import { serverDatabases, databaseId } from '../lib/appwrite-server';
+import { Query, ID } from 'node-appwrite';
 
 /**
- * In-memory storage for user health and fitness data
- * Maintains separate arrays per user for workouts, nutrition, feedback, and weekly targets
+ * Appwrite DB backed storage for user health and fitness data
  */
 export class MemoryStore {
-  private userWorkouts: Map<string, WorkoutEntry[]> = new Map();
-  private userNutrition: Map<string, NutritionEntry[]> = new Map();
-  private userFeedback: Map<string, FeedbackEntry[]> = new Map();
-  private userTargets: Map<string, WeeklyTarget> = new Map();
-
   /**
-   * Add a new entry for a user
+   * Add a new entry for a user in Appwrite Databases
    * @param userId - Unique user identifier
    * @param entry - The entry to add (workout, nutrition, or feedback)
    */
-  addEntry(userId: string, entry: WorkoutEntry | NutritionEntry | FeedbackEntry): void {
-    if ('type' in entry && 'duration' in entry) {
-      // WorkoutEntry
-      const workouts = this.userWorkouts.get(userId) || [];
-      workouts.push(entry as WorkoutEntry);
-      this.userWorkouts.set(userId, workouts);
-    } else if ('meal' in entry && 'items' in entry && 'calories' in entry) {
-      // NutritionEntry
-      const nutrition = this.userNutrition.get(userId) || [];
-      nutrition.push(entry as NutritionEntry);
-      this.userNutrition.set(userId, nutrition);
-    } else if ('notes' in entry) {
-      // FeedbackEntry
-      const feedback = this.userFeedback.get(userId) || [];
-      feedback.push(entry as FeedbackEntry);
-      this.userFeedback.set(userId, feedback);
+  async addEntry(userId: string, entry: WorkoutEntry | NutritionEntry | FeedbackEntry): Promise<void> {
+    try {
+      if ('type' in entry && 'duration' in entry) {
+        // WorkoutEntry
+        const workout = entry as WorkoutEntry;
+        await serverDatabases.createDocument(
+          databaseId,
+          'workouts',
+          ID.unique(),
+          {
+            userId,
+            name: 'type' in workout && (workout as any).name ? (workout as any).name : workout.type,
+            type: workout.type,
+            duration: workout.duration,
+            distance: workout.distance || null,
+            completed: true,
+            timestamp: new Date(workout.date).toISOString()
+          }
+        );
+      } else if ('meal' in entry && 'items' in entry && 'calories' in entry) {
+        // NutritionEntry
+        const nutrition = entry as NutritionEntry;
+        await serverDatabases.createDocument(
+          databaseId,
+          'nutrition',
+          ID.unique(),
+          {
+            userId,
+            mealType: nutrition.meal,
+            foodItem: nutrition.items.join(', '),
+            calories: nutrition.calories,
+            timestamp: new Date(nutrition.date).toISOString()
+          }
+        );
+      } else if ('notes' in entry) {
+        // FeedbackEntry
+        const feedback = entry as FeedbackEntry;
+        await serverDatabases.createDocument(
+          databaseId,
+          'feedback',
+          ID.unique(),
+          {
+            userId,
+            type: 'motivation',
+            notes: feedback.notes,
+            timestamp: new Date(feedback.date).toISOString()
+          }
+        );
+      }
+    } catch (error) {
+      console.error('Error in MemoryStore.addEntry:', error);
+      throw error;
     }
   }
 
   /**
-   * Get the complete context for a user
+   * Get the complete context for a user from Appwrite
    * @param userId - Unique user identifier
    * @returns Combined context with all user data
    */
-  getContext(userId: string): CombinedContext {
-    return {
-      workouts: this.userWorkouts.get(userId) || [],
-      nutrition: this.userNutrition.get(userId) || [],
-      feedback: this.userFeedback.get(userId) || [],
-      weeklyTarget: this.userTargets.get(userId),
-    };
+  async getContext(userId: string): Promise<CombinedContext> {
+    try {
+      // 1. Fetch workouts
+      const workoutsRes = await serverDatabases.listDocuments(
+        databaseId,
+        'workouts',
+        [Query.equal('userId', userId), Query.limit(100)]
+      );
+      const workouts: WorkoutEntry[] = workoutsRes.documents.map(doc => ({
+        date: doc.timestamp ? doc.timestamp.split('T')[0] : new Date().toISOString().split('T')[0],
+        type: doc.type,
+        duration: doc.duration,
+        distance: doc.distance || undefined
+      }));
+
+      // 2. Fetch nutrition
+      const nutritionRes = await serverDatabases.listDocuments(
+        databaseId,
+        'nutrition',
+        [Query.equal('userId', userId), Query.limit(100)]
+      );
+      const nutrition: NutritionEntry[] = nutritionRes.documents.map(doc => ({
+        date: doc.timestamp ? doc.timestamp.split('T')[0] : new Date().toISOString().split('T')[0],
+        meal: doc.mealType,
+        items: doc.foodItem ? doc.foodItem.split(',').map((s: string) => s.trim()) : [],
+        calories: doc.calories
+      }));
+
+      // 3. Fetch feedback
+      const feedbackRes = await serverDatabases.listDocuments(
+        databaseId,
+        'feedback',
+        [Query.equal('userId', userId), Query.limit(100)]
+      );
+      const feedback: FeedbackEntry[] = feedbackRes.documents.map(doc => ({
+        date: doc.timestamp ? doc.timestamp.split('T')[0] : new Date().toISOString().split('T')[0],
+        notes: doc.notes
+      }));
+
+      // 4. Fetch targets
+      const targetRes = await serverDatabases.listDocuments(
+        databaseId,
+        'activities',
+        [
+          Query.equal('userId', userId),
+          Query.equal('type', 'target'),
+          Query.orderDesc('timestamp'),
+          Query.limit(1)
+        ]
+      );
+      
+      let weeklyTarget: WeeklyTarget | undefined;
+      if (targetRes.documents.length > 0) {
+        const doc = targetRes.documents[0];
+        weeklyTarget = {
+          weekStart: doc.timestamp ? doc.timestamp.split('T')[0] : new Date().toISOString().split('T')[0],
+          targetRuns: doc.count || 0,
+          calorieBudget: doc.duration || 2000
+        };
+      }
+
+      return {
+        workouts,
+        nutrition,
+        feedback,
+        weeklyTarget
+      };
+    } catch (error) {
+      console.error('Error in MemoryStore.getContext:', error);
+      return {
+        workouts: [],
+        nutrition: [],
+        feedback: [],
+        weeklyTarget: undefined
+      };
+    }
   }
 
   /**
@@ -54,10 +155,27 @@ export class MemoryStore {
    * @param userId - Unique user identifier
    * @param target - The weekly target to set
    */
-  setWeeklyTarget(userId: string, target: WeeklyTarget): void {
-    this.userTargets.set(userId, target);
+  async setWeeklyTarget(userId: string, target: WeeklyTarget): Promise<void> {
+    try {
+      await serverDatabases.createDocument(
+        databaseId,
+        'activities',
+        ID.unique(),
+        {
+          userId,
+          type: 'target',
+          count: target.targetRuns,
+          duration: target.calorieBudget,
+          unit: 'runs/calories',
+          timestamp: new Date(target.weekStart).toISOString()
+        }
+      );
+    } catch (error) {
+      console.error('Error in MemoryStore.setWeeklyTarget:', error);
+      throw error;
+    }
   }
 }
 
 // Export singleton instance
-export const memoryStore = new MemoryStore(); 
+export const memoryStore = new MemoryStore();

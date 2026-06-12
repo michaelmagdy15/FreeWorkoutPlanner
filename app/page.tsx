@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { Activity, Utensils, Award, MessageSquare, Heart, BookOpen, Apple } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Sidebar } from "@/components/sidebar"
@@ -19,6 +19,7 @@ import { CommunityFeed } from "@/components/community-feed"
 import { RoutinesLibrary } from "@/components/routines-library"
 import { NutritionLibrary } from "@/components/nutrition-library"
 import { Preloader } from "@/components/preloader"
+import { client } from "@/lib/appwrite"
 
 export default function FitnessApp() {
   const [isLoaded, setIsLoaded] = useState(false)
@@ -27,6 +28,11 @@ export default function FitnessApp() {
   const [showSettingsModal, setShowSettingsModal] = useState(false)
   const [showReadiness, setShowReadiness] = useState(true)
   const [scaleVolume, setScaleVolume] = useState(false)
+
+  // Ping Appwrite server on mount
+  useEffect(() => {
+    client.ping();
+  }, []);
   
   const { user, isSignedIn } = useUser()
   const userId = isSignedIn && user ? user.id : 'default-user'
